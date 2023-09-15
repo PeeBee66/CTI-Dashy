@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .app-box-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin: -10px; /* To counteract the padding on app-box */
+        }
+
+        .app-box {
+            background-color: #f2f2f2;
+            padding: 10px;
+            margin: 10px;
+                                                             
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            width: calc(33.33% - 20px); /* Set width for three boxes per line */
+
+        }
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            margin-bottom: 20px; /* Add 20px gap at the bottom */
+        }
+         
+        button {
+            background-color: grey;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+                                                                  
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 90%;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        button + button {
+            margin-left: 20px;
+        }
+
+        button:hover {
+            background-color: orange;
+        }
+
+        .setting-row {
+            margin-bottom: 10px;
+                                                                     
+                        
+        }
+
+        .setting-row label {
+            display: block;
+            font-family: Arial, sans-serif;
+            margin-bottom: 5px;
+        }
+
+        .setting-row input {
+            width: 350px; /* Set input width to 350px */
+            font-family: Arial, sans-serif;
+                                                               
+                          
+        }
+    </style>
+</head>                                     
+<body>
+    <div style="display: flex; align-items: center; justify-content: center; margin: 25px 0;">
+        <img src="{{ url_for('static', filename='settings_1.png') }}" alt="User Management" height="55px">
+    </div>
+
+    <form style="display: flex; justify-content: space-between;" action="{{ url_for('settings.reboot_app') }}" method="post">
+        <button class="buttons-container" type="submit">Reboot CTI Dashy</button>
+    </form>
+
+    <form action="{{ url_for('settings.update_settings') }}" method="post">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;"> <!-- Add this style to make buttons align horizontally -->
+            <button class="save-all-button" type="submit">Save All</button>
+            <!-- Add a space or separator between the buttons, you can adjust the margin as needed -->
+            <div style="margin-left: 10px;"></div>
+        </div>
+        <div class="app-box-container">
+            {% for app, app_settings in config.items() %}
+                {% if app != 'DEFAULT' %}
+                    <div class="app-box">
+                        <h3>{{ app }}</h3>
+                        {% for setting_key, setting_value in app_settings.items() %}
+                            <div class="setting-row">
+                                <label>{{ setting_key }}:</label>
+                                <input type="text" name="{{ app }}_{{ setting_key }}" value="{{ setting_value }}">
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </form>
+</body>
+</html>         
+    </style>
+</head>

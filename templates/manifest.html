@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h1 img {
+    height: 50px;
+}
+
+/* Styling for each table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #ccc;
+    font-size: 10px;
+}
+
+th, td {
+    padding: 5px;
+    margin: 0;
+    border: 1px solid black;
+    font-size: 8px;
+}
+
+thead {
+    background-color: #f2f2f2;
+}
+
+.comparison-tables {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+/* Styling for the table containers */
+.table-container {
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 0;
+    width: 50%;
+    box-sizing: border-box;
+}
+
+.left-table {
+    margin-right: 10px;
+}
+
+/* Maintain a 10px margin on the left and right sides */
+.comparison-tables {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+/* Styling for the low and high table headings */
+.low-table-heading {
+    background-color: #e6f7ff;
+}
+
+.high-table-heading {
+    background-color: #ffcccc;
+}
+
+/* Styling for rows with missing files */
+.missing-file-text {
+    background-color: #ffdddd;
+}
+
+/* Styling for "File Found" status */
+.status-found {
+    color: green;
+}
+
+/* Styling for the table of contents */
+.table-of-contents {
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 0;
+    width: 50%;
+    box-sizing: border-box;
+}
+
+/* Styling for table of contents links */
+.table-of-contents a {
+    color: orange;
+    text-decoration: none;
+}
+
+/* Styling for active links */
+.table-of-contents a:visited, .table-of-contents a:active, .table-of-contents a:focus {
+    color: orange;
+}
+
+</style>
+</head>
+<body>
+
+<div style="display: flex; align-items: center; justify-content: center; margin: 25px 0;">
+    <img src="{{ url_for('static', filename='manifesto.png') }}" alt="Manifest" height="55px">
+</div>
+
+<div class="table-of-contents">
+    <h2>Table of Contents</h2>
+    <ul>
+        {% for table in tables %}
+        <li><a href="#{{ table.filename }}">{{ table.filename }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% for table in tables %}
+<h3 id="{{ table.filename }}">Comparison for {{ table.filename }}</h3>
+<div class="comparison-tables">
+    <div class="table-container">
+        <table class="left-table">
+            <caption class="low-table-heading">Low</caption>
+            <thead>
+                <tr>
+                    {% for heading in table.low_rows[0] %}
+                    <th>{{ heading }}</th>
+                    {% endfor %}
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for low_row, hash_result in table.zipped_results %}
+                <tr{% if not hash_result %} class="missing-file-text"{% endif %}>
+                    {% for low_value in low_row %}
+                    <td>{{ low_value }}</td>
+                    {% endfor %}
+                    <td>
+                        {% if hash_result %}
+                        <span class="status-found">File Transferred</span>
+                        {% else %}
+                        <span class="missing-file-text">Missing File</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-container">
+        <table class="right-table">
+            <caption class="high-table-heading">High</caption>
+            <thead>
+                <tr>
+                    {% for heading in table.high_rows[0] %}
+                    <th>{{ heading }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for high_row in table.high_rows[1:] %}
+                <tr>
+                    {% for high_value in high_row %}
+                    <td>{{ high_value }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+
+</body>
+</html>

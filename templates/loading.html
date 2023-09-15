@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Loading...</title>
+    <style>
+        /* CSS for the loading animation */
+        .loader {
+            border: 8px solid #333; /* Change border color to dark grey */
+            border-radius: 50%;
+            border-top: 8px solid #ff7b00;
+            width: 50px; /* Set width to 50px */
+            height: 50px; /* Set height to 50px */
+            -webkit-animation: spin 2s linear infinite; /* Safari */
+            animation: spin 2s linear infinite;
+            position: absolute;
+            top: 50%; /* Center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%);
+        }
+
+        /* Safari */
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <script>
+        // JavaScript to initiate the scanning process and redirect to the main page
+        window.addEventListener('DOMContentLoaded', () => {
+            // Simulate a loading delay or perform any necessary data processing here
+            setTimeout(() => {
+window.location.href = window.location.origin + "/data_dupe/start-scanning";
+                           }, 2000);  // Simulating a 2-second loading delay
+        });
+    </script>
+</head>
+<body>
+    <div class="loader"></div>
+</body>
+</html>

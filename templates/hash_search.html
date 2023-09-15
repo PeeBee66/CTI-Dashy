@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    body {
+        font-family: Arial, sans-serif; /* Set the font to Arial */
+    }
+    .content-box {
+        background-color: #f1f1f1;
+        border: 1px solid #ccc;
+        margin: 10px;
+        padding: 10px;
+    }
+
+    .form-box {
+        background-color: #f1f1f1;
+        margin: 10px;
+        padding: 10px;
+    }
+
+    .iframe-container {
+        background-color: #f1f1f1;
+        border: 1px solid #ccc;
+        margin: 10px;
+        padding: 10px;
+    }
+
+    .action-button {
+        background-color: grey;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        margin: 10px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 90%;
+        transition: background-color 0.3s ease-in-out;
+        text-decoration: none;
+    }
+
+    .action-button:hover {
+        background-color: orange;
+    }
+
+    .iframe-container iframe {
+        border: none;
+        width: 100%;
+        height: 480px;
+    }
+</style>
+</head>
+
+<body>
+    <div style="display: flex; align-items: center; justify-content: center; margin: 25px 0;">
+        <img src="{{ url_for('static', filename='Hash-a-re-doo.png') }}" alt="Hash Search" height="55px">
+    </div>
+
+    <div class="content-box">
+        <div class="form-box">
+            <form action="/hash_search/add" method="post">
+                <table>
+                    <tr>
+                        <td><label for="type">Type:</label></td>
+                        <td>
+                            <select id="type" name="type">
+                                <option value="IP">IP</option>
+                                <option value="FQDN">FQDN</option>
+                                <option value="MAC">MAC</option>
+                                <option value="URL">URL</option>
+                                <option value="EMAIL">EMAIL</option>
+                                <option value="BINARY">BINARY</option>
+                                <option value="MD5">MD5</option>
+                            </select>
+                        </td>
+                        <td><label for="identifier">Identifier:</label></td>
+                        <td><input type="text" id="identifier" name="identifier"></td>
+                        <td><label for="branch_area">Branch/Area:</label></td>
+                        <td><input type="text" id="branch_area" name="branch_area"></td>
+                        <td><label for="poc">POC:</label></td>
+                        <td><input type="text" id="poc" name="poc"></td>
+                        <td><input type="submit" value="Add" class="action-button"></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+
+    <div class="content-box">
+
+<h2 class="centered-text">Assist List</h2>
+<a href="{{ url_for('hash_search.generate_report') }}" class="action-button" target="iframe">Generate Report</a>
+
+{% if api_error %}
+<p class="error-message">Unable to connect to OpenCTI API. Please check your API configuration.</p>
+{% endif %}
+
+<div class="iframe-container">
+    <iframe src="{{ url_for('hash_search.table') }}" frameborder="0"></iframe>
+</div>
+        </div>
+    </div>
+</body>
+
+</html>

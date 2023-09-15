@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Groups</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid black;
+
+        }
+
+        th {
+            background-color: lightgray;
+            font-weight: bold;
+        }
+        button {
+            background-color: grey;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background-color: orange;
+        }
+        .add-group-cell {
+            text-align: center; /* Center-align the content */
+        }
+
+    </style>
+
+</head>
+<body>
+    <h2>User Groups</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>User ID</th>
+                <th>Groups</th>
+                <th>Group IDs</th>
+                <th>Connector Group</th>
+                <th>Add Group</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.name }}</td>
+                <td>{{ user.id }}</td>
+                <td>
+                    <ul>
+                        {% for group in user.groups %}
+                        <li>{{ group.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>
+                    <ul>
+                        {% for group in user.groups %}
+                        <li>{{ group.id }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>{{ user.is_connector }}</td>
+                <td class="add-group-cell"> <!-- Add the class here -->
+                    <form action="{{ url_for('user_mgmt.add_group') }}" method="post">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <input type="hidden" name="group_id" value="{{ connector_group_id }}">
+                        {% if not user.is_connector %}
+                        <button type="submit">Add Group</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

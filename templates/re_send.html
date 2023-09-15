@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .action-button {
+            background-color: grey;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 90%;
+            transition: background-color 0.3s ease-in-out;
+	    text-decoration: none;	
+        }
+
+        .action-button:hover {
+            background-color: orange;
+        }
+
+        .table-container {
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 5px;
+            margin: 0;
+            border: 1px solid black;
+        }
+
+        th:nth-child(1), td:nth-child(1) {
+            width: 20%;
+        }
+
+        th:nth-child(2), td:nth-child(2) {
+            width: 10%;
+        }
+
+        th:nth-child(3), td:nth-child(3) {
+            width: 20%;
+        }
+
+        th:nth-child(4), td:nth-child(4) {
+            width: 13%;
+        }
+
+        th:nth-child(5), td:nth-child(5) {
+            width: 6%;
+        }
+
+        th:nth-child(6), td:nth-child(6) {
+            width: 20%;
+        }
+
+        th:nth-child(7), td:nth-child(7) {
+            width: 5%;
+        }
+
+        th:nth-child(8), td:nth-child(8) {
+            width: 6%;
+        }
+        ul {
+            list-style: none;
+            text-align: left; 
+        }
+.error-message {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.table-of-contents {
+        text-align: left;
+        margin: 20px;
+        background-color: #f5f5f5; /* Light grey background color */
+        padding: 10px;
+        border-radius: 5px; /* Rounded corners for the box */
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Box shadow for a slight 3D effect */
+    }
+
+    .table-of-contents h2 {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .table-of-contents ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .table-of-contents li {
+        margin-bottom: 5px;
+    }
+    .table-of-contents a {
+        color: #FFA500; /* Orange color */
+        text-decoration: none;
+        transition: color 0.3s ease-in-out; /* Smooth transition */
+    }
+
+    .table-of-contents a:hover,
+    .table-of-contents li.active a {
+        color: #FFA500; /* Orange color */
+    }
+    </style>
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: center; margin: 25px 0;">
+        <img src="{{ url_for('static', filename='resend.png') }}" alt="User Management" height="55px">
+    </div>
+
+
+<div class="table-of-contents">
+    <h2>Table of Contents</h2>
+    <ul>
+        {% for table in csv_data %}
+        <li {% if loop.first %}class="active"{% endif %}><a href="#{{ table[0] }}">{{ table[0] }}</a></li>
+        {% endfor %}
+    </ul>
+    <div class="error-message centered">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="error-message-list">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+</div>
+    {% set last_ctimanifest_other = false %}
+    {% for table in csv_data %}
+        <div class="table-container">
+            <h2 id="{{ table[0] }}">{{ table[0] }}</h2>
+            <table>
+                <tr>
+                    <th>Filename</th>
+                    <th>CTIFeed</th>
+                    <th>MD5Hash</th>
+                    <th>DateTime</th>
+                    <th>FileSize</th>
+                    <th>FlowUUID</th>
+                    <th>Resend amount</th>
+                    <th>Resend File</th>
+                </tr>
+                {% for row in table[1] %}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{ cell }}</td>
+                        {% endfor %}
+                        <td>
+                            {% if not (last_ctimanifest_other and table[0] == 'CTImanifest_other') %}
+                                <form action="{{ url_for('re_send.re_send') }}" method="POST">
+                                    <input type="hidden" name="filename" value="{{ row[0] }}">
+                                    <input type="hidden" name="ctifeed" value="{{ row[1] }}">
+                                    <button class="action-button" type="submit">Resend</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% if table[0] == 'CTImanifest_other' and loop.last %}
+            {% set last_ctimanifest_other = true %}
+        {% endif %}
+    {% endfor %}
+</body>
+</html>
