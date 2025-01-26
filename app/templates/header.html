@@ -1,0 +1,15 @@
+<!-- CTIDashy_Flask/app/templates/header.html -->
+<header class="main-header">
+    <div class="header-content">
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/dachshund.png') }}" alt="Dachshund" class="header-logo">
+            <img src="{{ url_for('static', filename='images/CTIDashy.png') }}" alt="CTI Dashy" class="header-text">
+        </div>
+        <nav class="nav-menu">
+            <a href="{{ url_for('index') }}" class="{{ 'active' if active_tab == 'doogle' }}">Doogle</a>
+            <a href="{{ url_for('resend') }}" class="{{ 'active' if active_tab == 'resend' }}">Resend</a>
+            <a href="{{ url_for('manifest') }}" class="{{ 'active' if active_tab == 'manifest' }}">Manifest</a>
+            <a href="{{ url_for('settings') }}" class="{{ 'active' if active_tab == 'settings' }}">Settings</a>
+        </nav>
+    </div>
+</header>

@@ -1,0 +1,45 @@
+{# CTIDashy_Flask/app/templates/feature_disabled.html #}
+{% extends "base.html" %}
+{% block content %}
+<div class="feature-disabled-container">
+    <div class="feature-disabled-content">
+        <h2>{{ feature_name }} Feature Disabled</h2>
+        <p>This feature is currently disabled in the settings.</p>
+        <a href="{{ url_for('settings') }}" class="settings-link">Go to Settings</a>
+    </div>
+</div>
+
+<style>
+.feature-disabled-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 120px);
+    padding: 20px;
+}
+
+.feature-disabled-content {
+    text-align: center;
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-width: 400px;
+}
+
+.settings-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #ff9933;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.settings-link:hover {
+    background-color: #e88822;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,172 @@
+/* CTIDashy_Flask/app/static/css/doogle.css */
+
+.doogle-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 120px; /* Add padding to prevent overlap with header */
+    min-height: calc(100vh - 120px); /* Account for header height */
+}
+
+.doogle-center {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.doogle-logo {
+    margin-bottom: 20px;
+}
+
+.small-logo {
+    height: 90px;
+    margin-right: 0px;
+}
+
+.doogle-text {
+    height: 80px;
+}
+
+.search-box {
+    margin-top: 20px;
+}
+
+#search-input {
+    width: 500px;
+    padding: 12px 20px;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+#search-input:focus {
+    outline: none;
+    box-shadow: 0 1px 6px rgba(32,33,36,.28);
+}
+
+/* Search Results Styling */
+.search-results {
+    width: 80%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+.searching {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+.no-results {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+    font-style: italic;
+}
+
+.search-result {
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.result-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.entity-icon {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.search-result h3 {
+    margin: 0;
+    color: #1a73e8;
+    font-size: 18px;
+}
+
+.search-result p {
+    margin: 8px 0;
+    color: #202124;
+    line-height: 1.4;
+}
+
+.entity-details {
+    margin: 10px 0;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.entity-details span {
+    margin-right: 15px;
+    color: #5f6368;
+}
+
+.result-footer {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #70757a;
+}
+
+.error {
+    color: #d93025;
+    text-align: center;
+    padding: 20px;
+    background: #fce8e6;
+    border-radius: 4px;
+}
+
+.score {
+    font-weight: bold;
+}
+
+.validity, .published, .types {
+    color: #5f6368;
+}
+
+.search-result h3 {
+    color: #ff9933; /* Changed from blue to orange */
+    margin: 0;
+    font-size: 18px;
+}
+
+.result-footer {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #e0e0e0;
+    color: #666;
+    font-size: 14px;
+}
+
+.result-footer > div {
+    margin-bottom: 5px;
+}
+
+.type-value {
+    color: #ff9933;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.metadata {
+    color: #666;
+    font-size: 14px;
+    margin: 8px 0;
+}
+
+.metadata span {
+    margin-right: 15px;
+}
+
+.author, .markings, .labels, .value {
+    color: #666;
+    margin-bottom: 4px;
+}

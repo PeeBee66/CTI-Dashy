@@ -1,0 +1,59 @@
+{# CTIDashy_Flask/app/templates/manifest.html #}
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/manifest.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="manifest-container">
+    <div class="manifest-grid">
+        <div class="manifest-files">
+            <h3>system1 Files (Source of Truth)</h3>
+            <div class="file-list">
+                {% for file in system1_files %}
+                <div class="file-item" onclick="selectFile('source', '{{ file.name }}')">
+                    <div class="file-info">
+                        <div class="file-name">{{ file.name }}</div>
+                        <div class="file-size">{{ file.size }} KB</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="manifest-files">
+            <h3>system2 Files</h3>
+            <div class="file-list">
+                {% for file in system2_files %}
+                <div class="file-item" onclick="selectFile('target', '{{ file.name }}')">
+                    <div class="file-info">
+                        <div class="file-name">{{ file.name }}</div>
+                        <div class="file-size">{{ file.size }} KB</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="comparison-controls">
+        <div class="selected-files">
+            <div class="selected-file">
+                <label>Source File:</label>
+                <span id="source-selected" class="selected-name">Select source file</span>
+            </div>
+            <div class="selected-file">
+                <label>Target File:</label>
+                <span id="target-selected" class="selected-name">Select target file</span>
+            </div>
+        </div>
+        <div class="control-buttons">
+            <button onclick="compareManifests()" id="compare-btn" disabled>Compare Files</button>
+        </div>
+    </div>
+
+    <div id="comparison-results" class="comparison-results"></div>
+</div>
+
+<script src="{{ url_for('static', filename='js/manifest.js') }}"></script>
+{% endblock %}

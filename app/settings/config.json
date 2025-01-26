@@ -1,0 +1,11 @@
+{
+    "opencti_url": "http://192.168.0.45:6000/",
+    "opencti_api": "your-api-key-here",
+    "low_side_manifest_dir": "/opt/cti/data/3.Logs",
+    "high_side_manifest_dir": "/opt/cti/data/9.LogsH",
+    "resend_manifest_dir": "/opt/cti/data/3.Logs",
+    "feed_backup_dir": "/opt/cti/data/Feed_location",
+    "resend_folder": "/opt/cti/data/Resend",
+    "manifest_enabled": true,
+    "resend_enabled": true
+}

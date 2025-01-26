@@ -1,0 +1,19 @@
+<!-- CTIDashy_Flask/app/templates/index.html -->
+{% extends "base.html" %}
+{% block content %}
+<div class="doogle-container">
+   <div class="doogle-center">
+       <div class="doogle-logo">
+           <img src="{{ url_for('static', filename='images/Doogle1.png') }}" alt="Dachshund" class="small-logo">
+           <img src="{{ url_for('static', filename='images/Doogle.png') }}" alt="Doogle" class="doogle-text">
+       </div>
+       <div class="search-box">
+           <input type="text" id="search-input" placeholder="Search OpenCTI">
+           <button type="button" id="search-button">Search</button>
+       </div>
+   </div>
+   <div id="search-results" class="search-results"></div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

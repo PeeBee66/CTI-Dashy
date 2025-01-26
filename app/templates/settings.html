@@ -1,0 +1,242 @@
+{# CTIDashy_Flask/app/templates/settings.html #}
+{% extends "base.html" %}
+{% block content %}
+<div class="settings-container">
+    <div class="settings-content">
+        <h2>Site Settings</h2>
+        <form id="settings-form">
+            <section id="opencti">
+                <h3>OpenCTI Configuration</h3>
+                <div class="form-group">
+                    <label>Web Address:</label>
+                    <input type="text" name="opencti_url" value="{{ config.opencti_url }}" placeholder="https://">
+                </div>
+                <div class="form-group">
+                    <label>API Key:</label>
+                    <div class="api-input-group">
+                        <input type="password" name="opencti_api" value="{{ config.opencti_api }}" id="api-key-input">
+                        <button type="button" class="toggle-password" onclick="toggleApiVisibility()">
+                            <span class="eye-icon">👁️</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="button" onclick="testOpenCTI()" class="test-button">Test Connection</button>
+                    <span id="test-result" class="test-result"></span>
+                </div>
+            </section>
+
+            <section id="manifest">
+                <div class="section-header">
+                    <h3>Manifest Configuration</h3>
+                    <label class="toggle">
+                        <input type="checkbox" name="manifest_enabled" {% if config.manifest_enabled %}checked{% endif %} onchange="toggleSection('manifest')">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">{% if config.manifest_enabled %}Enabled{% else %}Disabled{% endif %}</span>
+                    </label>
+                </div>
+                <div class="section-content {% if not config.manifest_enabled %}disabled{% endif %}">
+                    <div class="disabled-message" {% if config.manifest_enabled %}style="display: none;"{% endif %}>
+                        This feature is currently disabled. Enable it using the toggle above.
+                    </div>
+                    <div class="settings-fields" {% if not config.manifest_enabled %}style="display: none;"{% endif %}>
+                        <div class="form-group">
+                            <label>system1 manifest folder location:</label>
+                            <input type="text" name="system1_manifest_dir" value="{{ config.system1_manifest_dir }}">
+                        </div>
+                        <div class="form-group">
+                            <label>system2 manifest folder location:</label>
+                            <input type="text" name="system2_manifest_dir" value="{{ config.system2_manifest_dir }}">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="resend">
+                <div class="section-header">
+                    <h3>Resend Configuration</h3>
+                    <label class="toggle">
+                        <input type="checkbox" name="resend_enabled" {% if config.resend_enabled %}checked{% endif %} onchange="toggleSection('resend')">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">{% if config.resend_enabled %}Enabled{% else %}Disabled{% endif %}</span>
+                    </label>
+                </div>
+                <div class="section-content {% if not config.resend_enabled %}disabled{% endif %}">
+                    <div class="disabled-message" {% if config.resend_enabled %}style="display: none;"{% endif %}>
+                        This feature is currently disabled. Enable it using the toggle above.
+                    </div>
+                    <div class="settings-fields" {% if not config.resend_enabled %}style="display: none;"{% endif %}>
+                        <div class="form-group">
+                            <label>system1 manifest folder location:</label>
+                            <input type="text" name="resend_manifest_dir" value="{{ config.resend_manifest_dir }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Back-up Feeds folder location:</label>
+                            <input type="text" name="feed_backup_dir" value="{{ config.feed_backup_dir }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Resend drop folder:</label>
+                            <input type="text" name="resend_folder" value="{{ config.resend_folder }}">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <button type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.toggle input {
+    display: none;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 48px;
+    height: 24px;
+    background-color: #ccc;
+    border-radius: 12px;
+    transition: .4s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+.toggle input:checked + .toggle-slider {
+    background-color: #4CAF50;
+}
+
+.toggle input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+.toggle-label {
+    margin-left: 8px;
+    font-size: 14px;
+}
+
+.section-content.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.disabled-message {
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    color: #666;
+    margin: 10px 0;
+}
+
+.settings-fields {
+    transition: opacity 0.3s ease;
+}
+</style>
+
+<script>
+function toggleApiVisibility() {
+    const input = document.getElementById('api-key-input');
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function toggleSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const checkbox = section.querySelector('input[type="checkbox"]');
+    const label = checkbox.parentElement.querySelector('.toggle-label');
+    const content = section.querySelector('.section-content');
+    const disabledMessage = content.querySelector('.disabled-message');
+    const settingsFields = content.querySelector('.settings-fields');
+    
+    label.textContent = checkbox.checked ? 'Enabled' : 'Disabled';
+    content.classList.toggle('disabled', !checkbox.checked);
+    disabledMessage.style.display = checkbox.checked ? 'none' : 'block';
+    settingsFields.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+document.querySelectorAll('.toggle input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', () => updateToggleLabel(checkbox));
+});
+
+function testOpenCTI() {
+    const url = document.querySelector('input[name="opencti_url"]').value;
+    const api = document.querySelector('input[name="opencti_api"]').value;
+    const resultSpan = document.getElementById('test-result');
+    
+    resultSpan.textContent = 'Testing...';
+    resultSpan.className = 'test-result testing';
+    
+    fetch('/test_opencti', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `opencti_url=${encodeURIComponent(url)}&opencti_api=${encodeURIComponent(api)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        resultSpan.textContent = data.message;
+        resultSpan.className = `test-result ${data.status}`;
+    })
+    .catch(error => {
+        resultSpan.textContent = 'Test failed: ' + error;
+        resultSpan.className = 'test-result error';
+    });
+}
+
+document.getElementById('settings-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    // Ensure toggle states are included even when unchecked
+    if (!formData.has('manifest_enabled')) {
+        formData.append('manifest_enabled', 'off');
+    }
+    if (!formData.has('resend_enabled')) {
+        formData.append('resend_enabled', 'off');
+    }
+    
+    fetch('/update_settings', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Settings saved successfully');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error saving settings: ' + error);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,163 @@
+/* CTIDashy_Flask/app/static/css/resend.css */
+.resend-container {
+    display: flex;
+    margin-top: 120px;
+}
+
+/* Fixed Left Sidebar */
+.manifest-files {
+    position: fixed;
+    top: 120px;
+    left: 0;
+    width: 300px;
+    height: calc(100vh - 120px);
+    background: white;
+    padding: 20px;
+    z-index: 100;
+    border-right: 1px solid #e0e0e0;
+}
+
+.manifest-files h3 {
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ff9933;
+    color: #333;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.file-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.file-item:hover {
+    background: #fff;
+    border-color: #ff9933;
+    transform: translateX(2px);
+}
+
+.file-item.selected {
+    background: #fff5eb;
+    border-color: #ff9933;
+    box-shadow: 0 2px 4px rgba(255, 153, 51, 0.2);
+}
+
+/* Main Content Area */
+.search-section {
+    width: calc(100% - 300px);
+    margin-left: 300px;
+}
+
+/* Search Controls */
+.search-controls {
+    position: fixed;
+    top: 120px;
+    left: 340px;
+    right: 20px;
+    background: white;
+    padding: 20px;
+    z-index: 100;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#search-input {
+    width: 900px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.search-button {
+    padding: 10px 20px;
+    background-color: #ff9933;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* Results Container */
+.results-container {
+    position: fixed;
+    left: 340px;
+    right: 20px;
+    top: 200px;
+    bottom: 20px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.result-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.result-header {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.result-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.result-field {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+}
+
+.field-label {
+    color: #666;
+    font-weight: 500;
+}
+
+.field-value {
+    color: #333;
+    word-break: break-all;
+}
+
+.resend-button {
+    margin-top: 10px;
+    padding: 8px;
+    background-color: #ffab5e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+.error {
+    color: #d93025;
+    padding: 15px;
+    background: #fce8e6;
+    border-radius: 6px;
+    margin: 10px 0;
+}

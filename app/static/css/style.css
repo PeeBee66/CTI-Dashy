@@ -1,0 +1,77 @@
+/* CTIDashy_Flask/app/static/css/style.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.main-header {
+    background-color: #f8f9fa;
+    height: 120px;
+    display: flex;
+    align-items: flex-end;
+    border-bottom: 1px solid #e9ecef;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.nav-menu {
+    padding-bottom: 0;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: #5f6368;
+    margin-left: 10px;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 4px 4px 0 0;
+    background-color: #ffe6cc;
+    transition: all 0.2s ease;
+    border-bottom: none;
+}
+
+.header-content {
+    width: 100%;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-logo, .header-text {
+    height: 70px;
+}
+
+.nav-menu a:hover {
+    background-color: #ff9933;
+    color: white;
+}
+
+.nav-menu a.active {
+    background-color: #ff9933;
+    color: white;
+    font-size: 14px;
+    padding: 8px 16px;
+}
+
+.content {
+    margin-top: 120px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #ff9933;
+    border: 1px solid #ff9933;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #e88822;
+    border: 1px solid #e88822;
+}

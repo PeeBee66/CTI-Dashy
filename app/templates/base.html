@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTI Dashy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% if active_tab == 'doogle' %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/doogle.css') }}">
+    {% endif %}
+    {% if active_tab == 'settings' %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+    {% endif %}
+    {% if active_tab == 'manifest' %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/manifest.css') }}">
+    {% endif %}
+    {% if active_tab == 'resend' %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/resend.css') }}">
+    {% endif %}
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/dachshund.png') }}" alt="Dachshund" class="header-logo">
+                <img src="{{ url_for('static', filename='images/CTIDashy.png') }}" alt="CTI Dashy" class="header-text">
+            </div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('index') }}" class="{{ 'active' if active_tab == 'doogle' }}">Doogle</a>
+                <a href="{{ url_for('resend') }}" class="{{ 'active' if active_tab == 'resend' }}">Resend</a>
+                <a href="{{ url_for('manifest') }}" class="{{ 'active' if active_tab == 'manifest' }}">Manifest</a>
+                <a href="{{ url_for('settings') }}" class="{{ 'active' if active_tab == 'settings' }}">Settings</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Scripts -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

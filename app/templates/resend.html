@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/resend.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="resend-container">
+    <div class="manifest-files">
+        <h3>Available Manifests</h3>
+        <div class="file-list">
+            {% for manifest in manifests %}
+            <div class="file-item">
+                <div class="file-info">
+                    <div class="file-name">{{ manifest.name }}</div>
+                    <div class="file-size">{{ manifest.size }} KB</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="search-section">
+        <div class="search-controls">
+            <input type="text" id="search-input" placeholder="Search by Filename, CTIfeed, MD5Hash, DateTime, FileSize, or FlowUUID...">
+            <button onclick="performSearch()" class="search-button">Search</button>
+        </div>
+        <div id="search-results" class="results-container"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/resend.js') }}"></script>
+{% endblock %}
