@@ -20,10 +20,18 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.manifest-files h3 {
-    margin: 0 0 15px 0;
+.manifest-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 2px solid #ff9933;
+}
+
+.manifest-header h3 {
+    margin: 0;
+    padding: 0;
     color: #333;
     font-size: 1.1em;
     font-weight: 600;
@@ -132,28 +140,45 @@
 .control-buttons {
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
 }
 
+/* Standardized Button Styles */
 button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
+    padding: 7px 18px;
     background-color: #ff9933;
+    border: 0px solid #ff9933;
+    border-radius: 5px;
     color: white;
-    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
 }
 
 button:hover {
-    background-color: #ff8c1a;
-    transform: translateY(-1px);
+    background-color: #e88822;
+    border: 0px solid #e88822;
 }
 
 button:disabled {
-    background-color: #d1d1d1;
+    background-color: #cccccc;
     cursor: not-allowed;
-    transform: none;
+    border: 0px solid #cccccc;
+}
+
+/* Refresh button specific */
+.refresh-button {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.refresh-icon {
+    font-size: 1.2em;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.refresh-button:not(:disabled):hover .refresh-icon {
+    transform: rotate(180deg);
 }
 
 .comparison-results {
@@ -220,14 +245,15 @@ button:disabled {
     margin: 0;
 }
 
-.export-btn {
-    float: right;
-    background-color: #4caf50;
-    margin-left: 10px;
+.manifest-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
 }
 
-.export-btn:hover {
-    background-color: #43a047;
+.manifest-section h4 {
+    color: #333;
+    margin: 0 0 10px 0;
 }
 
 .no-differences {
@@ -237,6 +263,18 @@ button:disabled {
     background: #f1f8e9;
     border-radius: 6px;
     font-weight: 500;
+}
+
+.manifest-error {
+    margin: 10px 0;
+    padding: 15px;
+    background: #ffebee;
+    border-radius: 6px;
+}
+
+.manifest-error h4 {
+    color: #c62828;
+    margin: 0 0 10px 0;
 }
 
 .error {

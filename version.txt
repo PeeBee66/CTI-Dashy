@@ -1,0 +1,21 @@
+2.0.3 - Current
+- Fix doogle seach throwing up errors
+- Fix the Resend error message and add in a verification
+
+2.0.2 - Quality of life additions
+- Added version display
+- Added a refresh button
+- Enhanced error messages
+- Improved file handling for resend feature
+
+2.0.1 - Bug fixes
+- Fixed file path handling in config.py
+- Improved error handling in manifest comparison
+- Added SSL verification toggle for OpenCTI connection
+- Added enable/disable for manifest and resend
+
+2.0.0 - Initial release
+- Basic OpenCTI search functionality
+- Manifest comparison tool
+- Resend capability
+- Settings management

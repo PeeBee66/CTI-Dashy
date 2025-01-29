@@ -17,13 +17,26 @@
     border-right: 1px solid #e0e0e0;
 }
 
-.manifest-files h3 {
-    margin: 0 0 15px 0;
+.manifest-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 2px solid #ff9933;
+}
+
+.manifest-header h3 {
+    margin: 0;
+    padding: 0;
     color: #333;
     font-size: 1.1em;
     font-weight: 600;
+}
+
+.file-list {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
 }
 
 .file-item {
@@ -48,6 +61,23 @@
     box-shadow: 0 2px 4px rgba(255, 153, 51, 0.2);
 }
 
+.file-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.file-name {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.95em;
+}
+
+.file-size {
+    color: #666;
+    font-size: 0.85em;
+}
+
 /* Main Content Area */
 .search-section {
     width: calc(100% - 300px);
@@ -64,24 +94,55 @@
     padding: 20px;
     z-index: 100;
     border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    gap: 10px;
 }
 
 #search-input {
-    width: 900px;
+    flex: 1;
     padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 6px;
+    border-radius: 4px;
     font-size: 14px;
+    min-width: 0;
 }
 
-.search-button {
-    padding: 10px 20px;
+/* Standardized Button Style */
+button {
+    padding: 7px 18px;
     background-color: #ff9933;
+    border: 0px solid #ff9933;
+    border-radius: 5px;
     color: white;
-    border: none;
-    border-radius: 6px;
     cursor: pointer;
-    font-weight: 500;
+}
+
+button:hover {
+    background-color: #e88822;
+    border: 0px solid #e88822;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    border: 0px solid #cccccc;
+}
+
+/* Refresh button */
+.refresh-button {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.refresh-icon {
+    font-size: 1.2em;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.refresh-button:not(:disabled):hover .refresh-icon {
+    transform: rotate(180deg);
 }
 
 /* Results Container */
@@ -138,16 +199,10 @@
 
 .resend-button {
     margin-top: 10px;
-    padding: 8px;
-    background-color: #ffab5e;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
     width: 100%;
-    font-size: 0.9em;
 }
 
+/* Status indicators */
 .loading {
     text-align: center;
     padding: 20px;

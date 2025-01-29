@@ -25,7 +25,10 @@
         <div class="header-content">
             <div class="logo-container">
                 <img src="{{ url_for('static', filename='images/dachshund.png') }}" alt="Dachshund" class="header-logo">
-                <img src="{{ url_for('static', filename='images/CTIDashy.png') }}" alt="CTI Dashy" class="header-text">
+                <div class="logo-version">
+                    <img src="{{ url_for('static', filename='images/CTIDashy.png') }}" alt="CTI Dashy" class="header-text">
+                    <span class="version">v{{ version }}</span>
+                </div>
             </div>
             <nav class="nav-menu">
                 <a href="{{ url_for('index') }}" class="{{ 'active' if active_tab == 'doogle' }}">Doogle</a>

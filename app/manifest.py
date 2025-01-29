@@ -1,4 +1,3 @@
-# CTIDashy_Flask/app/manifest.py
 import os
 import logging
 import pandas as pd
@@ -34,7 +33,6 @@ def read_manifest_file(file_path):
         df = pd.read_csv(file_path)
         if 'MD5Hash' in df.columns:
             df['MD5Hash'] = df['MD5Hash'].str.lower()
-        # Convert NaN to None for JSON serialization
         df = df.where(pd.notnull(df), None)
         return df
     except Exception as e:
@@ -53,7 +51,6 @@ def compare_manifests(source_file, target_file):
         differences = missing_df.to_dict('records')
         logger.info(f"Found {len(differences)} differences")
         
-        # Ensure no NaN values in output
         clean_differences = []
         for diff in differences:
             clean_diff = {k: ('' if pd.isna(v) else v) for k, v in diff.items()}
@@ -63,6 +60,42 @@ def compare_manifests(source_file, target_file):
         
     except Exception as e:
         logger.error(f"Error comparing manifests: {str(e)}")
+        raise
+
+def compare_all_manifests(system1_dir, system2_dir):
+    try:
+        system1_files = get_manifest_files(system1_dir)
+        results = []
+        
+        for file in system1_files:
+            source_file = os.path.join(system1_dir, file['name'])
+            target_file = os.path.join(system2_dir, file['name'])
+            
+            if not os.path.exists(target_file):
+                results.append({
+                    'manifest': file['name'],
+                    'differences': [],
+                    'error': 'Target file not found on system2'
+                })
+                continue
+                
+            try:
+                differences = compare_manifests(source_file, target_file)
+                results.append({
+                    'manifest': file['name'],
+                    'differences': differences,
+                    'error': None
+                })
+            except Exception as e:
+                results.append({
+                    'manifest': file['name'],
+                    'differences': [],
+                    'error': str(e)
+                })
+                
+        return results
+    except Exception as e:
+        logger.error(f"Error in compare_all_manifests: {str(e)}")
         raise
 
 @app.route('/manifest')
@@ -80,6 +113,32 @@ def manifest():
                          active_tab='manifest',
                          system1_files=get_manifest_files(system1_dir),
                          system2_files=get_manifest_files(system2_dir))
+
+@app.route('/refresh_manifest_files', methods=['POST'])
+def refresh_manifest_files():
+    try:
+        config = load_config()
+        if not config.get('manifest_enabled', True):
+            return jsonify({
+                'status': 'error',
+                'message': 'Manifest feature is disabled'
+            }), 403
+            
+        system1_dir = config.get('system1_manifest_dir', '')
+        system2_dir = config.get('system2_manifest_dir', '')
+        
+        return jsonify({
+            'status': 'success',
+            'system1_files': get_manifest_files(system1_dir),
+            'system2_files': get_manifest_files(system2_dir)
+        })
+        
+    except Exception as e:
+        logger.error(f"Refresh error: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 @app.route('/compare_manifests', methods=['POST'])
 def compare_manifests_endpoint():
@@ -103,4 +162,24 @@ def compare_manifests_endpoint():
         
     except Exception as e:
         logger.error(f"Comparison error: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/compare_all_manifests', methods=['POST'])
+def compare_all_manifests_endpoint():
+    try:
+        config = load_config()
+        if not config.get('manifest_enabled', True):
+            return jsonify({
+                'status': 'error',
+                'message': 'Manifest feature is disabled'
+            }), 403
+            
+        system1_dir = config.get('system1_manifest_dir', '')
+        system2_dir = config.get('system2_manifest_dir', '')
+        
+        results = compare_all_manifests(system1_dir, system2_dir)
+        return jsonify({'status': 'success', 'results': results})
+        
+    except Exception as e:
+        logger.error(f"Compare all error: {str(e)}")
         return jsonify({'status': 'error', 'message': str(e)}), 500

@@ -1,7 +1,8 @@
-# CTIDashy_Flask/app/resend.py
 import os
 import logging
 import csv
+import shutil
+from datetime import datetime
 from flask import render_template, jsonify, request
 from app import app
 from app.config import load_config
@@ -51,6 +52,58 @@ def read_manifest_file(file_path):
         logger.error(f"Error reading manifest {file_path}: {str(e)}")
         return []
 
+def extract_year_from_datetime(dt_str):
+    try:
+        dt = datetime.strptime(dt_str.strip(), "%a %b %d %H:%M:%S UTC %Y")
+        return str(dt.year)
+    except Exception as e:
+        logger.error(f"Error extracting year from {dt_str}: {str(e)}")
+        return None
+
+def verify_file_transfer(source_path, target_path):
+    """Verify file transfer by comparing file sizes, existence and permissions"""
+    try:
+        if not os.path.exists(source_path):
+            return False, "Source file not found"
+            
+        target_dir = os.path.dirname(target_path)
+        if not os.path.exists(target_dir):
+            try:
+                os.makedirs(target_dir, mode=0o777, exist_ok=True)
+            except Exception as e:
+                return False, f"Cannot create target directory: {str(e)}"
+                
+        if not os.access(target_dir, os.W_OK):
+            return False, f"Target directory not writable: {target_dir}"
+            
+        try:
+            shutil.copy2(source_path, target_path)
+        except Exception as e:
+            return False, f"Copy failed: {str(e)}"
+            
+        if not os.path.exists(target_path):
+            return False, "Target file not created after copy attempt"
+            
+        source_size = os.path.getsize(source_path)
+        target_size = os.path.getsize(target_path)
+        
+        if source_size != target_size:
+            os.remove(target_path)
+            return False, f"Size mismatch: Source={source_size}, Target={target_size}"
+            
+        source_perms = os.stat(source_path).st_mode
+        target_perms = os.stat(target_path).st_mode
+        if source_perms != target_perms:
+            try:
+                os.chmod(target_path, source_perms)
+            except Exception as e:
+                return False, f"Could not set target permissions: {str(e)}"
+                
+        return True, "File transfer verified successfully"
+        
+    except Exception as e:
+        return False, f"Verification error: {str(e)}"
+
 @app.route('/resend')
 def resend():
     config = load_config()
@@ -63,6 +116,29 @@ def resend():
     return render_template('resend.html', 
                          active_tab='resend',
                          manifests=manifests)
+
+@app.route('/refresh_resend_manifests', methods=['POST'])
+def refresh_resend_manifests():
+    try:
+        config = load_config()
+        if not config.get('resend_enabled', True):
+            return jsonify({
+                'status': 'error',
+                'message': 'Resend feature is disabled'
+            }), 403
+            
+        manifests = get_manifest_contents(config.get('resend_manifest_dir', ''))
+        return jsonify({
+            'status': 'success',
+            'manifests': manifests
+        })
+        
+    except Exception as e:
+        logger.error(f"Refresh error: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 @app.route('/search_manifest', methods=['POST'])
 def search_manifest():
@@ -84,6 +160,7 @@ def search_manifest():
 
         all_results = []
         manifest_files = get_manifest_contents(manifest_dir)
+        
         for manifest in manifest_files:
             file_path = os.path.join(manifest_dir, manifest['name'])
             try:
@@ -101,7 +178,7 @@ def search_manifest():
     except Exception as e:
         logger.error(f"Search error: {str(e)}")
         return jsonify({'error': str(e)}), 500
-    
+
 @app.route('/initiate_resend', methods=['POST'])
 def initiate_resend():
     try:
@@ -109,30 +186,33 @@ def initiate_resend():
         data = request.get_json()
         
         if not data or not all(key in data for key in ['Filename', 'CTIfeed', 'DateTime']):
-            return jsonify({'status': 'error', 'message': 'Missing required file information'}), 400
+            return jsonify({
+                'status': 'error', 
+                'message': 'Missing required file information'
+            }), 400
             
         source_base = config.get('feed_backup_dir', '').strip()
         target_base = config.get('resend_folder', '').strip()
         
         if not source_base or not target_base:
-            return jsonify({'status': 'error', 'message': 'Feed backup or resend folders not configured'}), 400
+            return jsonify({
+                'status': 'error',
+                'message': 'Feed backup or resend folders not configured'
+            }), 400
+
+        year = extract_year_from_datetime(data['DateTime'])
+        if not year:
+            return jsonify({
+                'status': 'error',
+                'message': 'Could not determine year from DateTime'
+            }), 400
             
-        # Extract year from DateTime
-        year = data['DateTime'].split()[3]  # Format: "Wed Jul 24 03:53:07 UTC 2024"
         feed_folder = data['CTIfeed']
         filename = data['Filename']
         
-        # Construct source and target paths with year folder
         source_path = os.path.join(source_base, feed_folder, year, filename)
         target_folder = os.path.join(target_base, feed_folder)
         target_path = os.path.join(target_folder, filename)
-        
-        # Normalize paths for cross-platform compatibility
-        source_path = os.path.normpath(source_path)
-        target_path = os.path.normpath(target_path)
-        
-        # Create target directory if it doesn't exist
-        os.makedirs(target_folder, exist_ok=True)
         
         if not os.path.exists(source_path):
             return jsonify({
@@ -140,12 +220,30 @@ def initiate_resend():
                 'message': f'Source file not found: {source_path}'
             }), 404
             
-        import shutil
-        shutil.copy2(source_path, target_path)
+        os.makedirs(target_folder, mode=0o777, exist_ok=True)
         
+        success, message = verify_file_transfer(source_path, target_path)
+        
+        if not success:
+            return jsonify({
+                'status': 'error',
+                'message': f'Transfer verification failed: {message}'
+            }), 500
+            
+        if not os.path.exists(target_path):
+            return jsonify({
+                'status': 'error',
+                'message': 'File appears missing after successful transfer'
+            }), 500
+            
         return jsonify({
             'status': 'success',
-            'message': f'File successfully copied to resend folder'
+            'message': f'File successfully copied from {source_path} to {target_path}',
+            'details': {
+                'source_path': source_path,
+                'target_path': target_path,
+                'verification': message
+            }
         })
         
     except Exception as e:

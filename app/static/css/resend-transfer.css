@@ -1,0 +1,67 @@
+.transfer-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 9999;
+    max-width: 600px;
+    width: 90%;
+    overflow-y: auto;
+    max-height: 90vh;
+}
+
+.popup-content {
+    position: relative;
+    background: white;
+    padding: 15px;
+}
+
+.transfer-popup.success .transfer-details h3 {
+    color: #2e7d32;
+    margin-top: 0;
+}
+
+.transfer-popup.error .transfer-error {
+    color: #d32f2f;
+    padding: 15px;
+    background: #ffebee;
+    border-radius: 4px;
+}
+
+.popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #666;
+    z-index: 10000;
+}
+
+.transfer-details {
+    padding: 10px;
+    background: white;
+}
+
+.detail-section {
+    margin: 15px 0;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.detail-section h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.detail-section p {
+    margin: 5px 0;
+    word-break: break-all;
+}

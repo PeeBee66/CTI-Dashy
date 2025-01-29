@@ -1,10 +1,11 @@
 // CTIDashy_Flask/app/static/js/manifest.js
-
 let selectedSource = null;
 let selectedTarget = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeFileSelectors();
+    initializeRefreshButton();
+    initializeCompareAllButton();
 });
 
 function initializeFileSelectors() {
@@ -12,10 +13,125 @@ function initializeFileSelectors() {
         item.addEventListener('click', function(e) {
             const type = e.target.closest('.manifest-files').querySelector('h3').textContent.toLowerCase().includes('low') ? 'source' : 'target';
             const filename = this.querySelector('.file-name').textContent;
-            clearAllSelections();
             selectFile(type, filename, this);
         });
     });
+}
+
+function initializeRefreshButton() {
+    const refreshButton = document.getElementById('refresh-btn');
+    if (refreshButton) {
+        refreshButton.addEventListener('click', refreshFileList);
+    }
+}
+
+function initializeCompareAllButton() {
+    const compareAllButton = document.getElementById('compare-all-btn');
+    if (compareAllButton) {
+        compareAllButton.addEventListener('click', compareAllManifests);
+    }
+}
+
+function findMatchingFile(filename, sourceToTarget) {
+    const selector = sourceToTarget ? '#system2-files' : '#system1-files';
+    const container = document.querySelector(selector);
+    if (!container) return null;
+
+    const fileItems = container.querySelectorAll('.file-item');
+    for (let item of fileItems) {
+        if (item.querySelector('.file-name').textContent === filename) {
+            return item;
+        }
+    }
+    return null;
+}
+
+function selectFile(type, filename, element) {
+    document.querySelectorAll('.file-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    element.classList.add('selected');
+    
+    if (type === 'source') {
+        selectedSource = filename;
+        document.getElementById('source-selected').textContent = filename;
+        
+        const matchingFile = findMatchingFile(filename, true);
+        if (matchingFile) {
+            matchingFile.classList.add('selected');
+            selectedTarget = filename;
+            document.getElementById('target-selected').textContent = filename;
+        } else {
+            selectedTarget = null;
+            document.getElementById('target-selected').textContent = 'Select target file';
+        }
+    } else {
+        selectedTarget = filename;
+        document.getElementById('target-selected').textContent = filename;
+        
+        const matchingFile = findMatchingFile(filename, false);
+        if (matchingFile) {
+            matchingFile.classList.add('selected');
+            selectedSource = filename;
+            document.getElementById('source-selected').textContent = filename;
+        } else {
+            selectedSource = null;
+            document.getElementById('source-selected').textContent = 'Select source file';
+        }
+    }
+    
+    document.getElementById('compare-btn').disabled = !(selectedSource && selectedTarget && selectedSource === selectedTarget);
+}
+
+function refreshFileList() {
+    const refreshButton = document.getElementById('refresh-btn');
+    if (refreshButton) {
+        refreshButton.disabled = true;
+        refreshButton.textContent = 'Refreshing...';
+    }
+
+    fetch('/refresh_manifest_files', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            updateFileList('system1-files', data.system1_files);
+            updateFileList('system2-files', data.system2_files);
+            clearAllSelections();
+        } else {
+            showError(data.message || 'Failed to refresh file list');
+        }
+    })
+    .catch(error => {
+        showError('Failed to refresh file list: ' + error.message);
+    })
+    .finally(() => {
+        if (refreshButton) {
+            refreshButton.disabled = false;
+            refreshButton.textContent = '↻ Refresh';
+        }
+    });
+}
+
+function updateFileList(containerId, files) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = files.map(file => `
+        <div class="file-item">
+            <div class="file-info">
+                <div class="file-name">${file.name}</div>
+                <div class="file-size">${file.size} KB</div>
+            </div>
+        </div>
+    `).join('');
+
+    initializeFileSelectors();
 }
 
 function clearAllSelections() {
@@ -29,80 +145,91 @@ function clearAllSelections() {
     document.getElementById('compare-btn').disabled = true;
 }
 
-function findMatchingFile(filename) {
-    const otherSideSelector = selectedSource ? '.manifest-files:not(:first-child)' : '.manifest-files:first-child';
-    const otherSideFiles = document.querySelector(otherSideSelector).querySelectorAll('.file-item');
-    
-    for (let file of otherSideFiles) {
-        if (file.querySelector('.file-name').textContent === filename) {
-            return file;
-        }
-    }
-    return null;
-}
-
-function selectFile(type, filename, element) {    
-    element.classList.add('selected');
-    
-    if (type === 'source') {
-        selectedSource = filename;
-        document.getElementById('source-selected').textContent = filename;
-        
-        const matchingFile = findMatchingFile(filename);
-        if (matchingFile) {
-            matchingFile.classList.add('selected');
-            selectedTarget = filename;
-            document.getElementById('target-selected').textContent = filename;
-        }
-    } else {
-        selectedTarget = filename;
-        document.getElementById('target-selected').textContent = filename;
-        
-        const matchingFile = findMatchingFile(filename);
-        if (matchingFile) {
-            matchingFile.classList.add('selected');
-            selectedSource = filename;
-            document.getElementById('source-selected').textContent = filename;
-        }
-    }
-    
-    document.getElementById('compare-btn').disabled = !(selectedSource && selectedTarget && selectedSource === selectedTarget);
-}
-
 function formatDateTime(dtStr) {
     if (!dtStr) return '';
-    return dtStr;  // Return as is since it's already in correct format
+    return dtStr;
 }
 
-function formatFileSize(bytes) {
-    if (!bytes) return '0.00 MB';
-    const mb = (parseInt(bytes) / (1024 * 1024)).toFixed(2);
-    return `${mb} MB`;
+function formatFileSize(sizeInBytes) {
+    if (!sizeInBytes) return '0.00 KB';
+    const kb = parseInt(sizeInBytes) / 1024;
+    return `${kb.toFixed(1)} KB`;
 }
 
 function formatFlowUUID(uuid) {
     if (!uuid) return '';
-    const cleanUuid = uuid.trim();
-    return cleanUuid;  // Return as is since it's already formatted
+    return uuid.trim();
 }
 
-function displayResults(differences) {
+function compareAllManifests() {
+    const resultsContainer = document.getElementById('comparison-results');
+    resultsContainer.innerHTML = '<div class="loading">Comparing all manifests...</div>';
+    
+    fetch('/compare_all_manifests', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            displayCompareAllResults(data.results);
+        } else {
+            showError(data.message);
+        }
+    })
+    .catch(error => {
+        showError('Failed to compare manifests: ' + error.message);
+    });
+}
+
+function displayCompareAllResults(results) {
     const resultsContainer = document.getElementById('comparison-results');
     resultsContainer.innerHTML = '';
     
-    if (!differences || differences.length === 0) {
-        resultsContainer.innerHTML = '<div class="no-differences">No differences found between the files</div>';
-        return;
-    }
+    const totalDifferences = results.reduce((total, result) => 
+        total + (result.differences ? result.differences.length : 0), 0);
     
     const summaryDiv = document.createElement('div');
     summaryDiv.className = 'comparison-summary';
     summaryDiv.innerHTML = `
-        <h3>Comparison Results</h3>
-        <p>Found ${differences.length} entries in system1 missing from system2</p>
+        <h3>Complete Comparison Results</h3>
+        <p>Found ${totalDifferences} total differences across ${results.length} manifests</p>
     `;
     resultsContainer.appendChild(summaryDiv);
     
+    results.forEach((result, index) => {
+        const manifestSection = document.createElement('div');
+        manifestSection.className = 'manifest-section';
+        
+        
+        if (result.error) {
+            manifestSection.innerHTML = `
+                <div class="manifest-error">
+                    <h4>${result.manifest}</h4>
+                    <p class="error">${result.error}</p>
+                </div>`;
+        } else if (!result.differences || result.differences.length === 0) {
+            manifestSection.innerHTML = `
+                <div class="no-differences">
+                    <h4>${result.manifest}</h4>
+                    <p>No differences found</p>
+                </div>`;
+        } else {
+            manifestSection.innerHTML = `
+                <h4>${result.manifest}</h4>
+                <p>Found ${result.differences.length} differences</p>
+            `;
+            const table = createDifferencesTable(result.differences);
+            manifestSection.appendChild(table);
+        }
+        
+        resultsContainer.appendChild(manifestSection);
+    });
+}
+
+function createDifferencesTable(differences) {
     const table = document.createElement('table');
     table.className = 'comparison-table';
     
@@ -120,18 +247,17 @@ function displayResults(differences) {
     const tbody = document.createElement('tbody');
     differences.forEach(diff => {
         const row = document.createElement('tr');
-        
         headers.forEach(header => {
             const td = document.createElement('td');
             switch(header) {
                 case 'DateTime':
-                    td.textContent = formatDateTime(diff.DateTime);
+                    td.textContent = formatDateTime(diff[header]);
                     break;
                 case 'FileSize':
-                    td.textContent = formatFileSize(diff.FileSize);
+                    td.textContent = formatFileSize(diff[header]);
                     break;
                 case 'FlowUUID':
-                    td.textContent = formatFlowUUID(diff.FlowUUID);
+                    td.textContent = formatFlowUUID(diff[header]);
                     break;
                 default:
                     td.textContent = diff[header] || '';
@@ -145,7 +271,32 @@ function displayResults(differences) {
     });
     table.appendChild(tbody);
     
-    resultsContainer.appendChild(table);
+    return table;
+}
+
+function displayResults(differences, manifestName = null) {
+    const resultsContainer = document.getElementById('comparison-results');
+    resultsContainer.innerHTML = '';
+    
+    if (!differences || differences.length === 0) {
+        resultsContainer.innerHTML = '<div class="no-differences">No differences found between the files</div>';
+        return;
+    }
+    
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'comparison-summary';
+    summaryDiv.innerHTML = `
+        <h3>${manifestName ? `Comparison Results for ${manifestName}` : 'Comparison Results'}</h3>
+        <p>Found ${differences.length} entries in system1 missing from system2</p>
+    `;
+    resultsContainer.appendChild(summaryDiv);
+    
+    resultsContainer.appendChild(createDifferencesTable(differences));
+}
+
+function showError(message) {
+    const resultsContainer = document.getElementById('comparison-results');
+    resultsContainer.innerHTML = `<div class="error">${message}</div>`;
 }
 
 function compareManifests() {
@@ -167,7 +318,7 @@ function compareManifests() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            displayResults(data.differences);
+            displayResults(data.differences, selectedSource);
         } else {
             showError(data.message);
         }
@@ -175,9 +326,4 @@ function compareManifests() {
     .catch(error => {
         showError(`Error: ${error.message || 'Unknown error occurred'}`);
     });
-}
-
-function showError(message) {
-    const resultsContainer = document.getElementById('comparison-results');
-    resultsContainer.innerHTML = `<div class="error">${message}</div>`;
 }
