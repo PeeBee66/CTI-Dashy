@@ -1,0 +1,11 @@
+{
+    "opencti_url": "http://172.21.32.84:4000/",
+    "opencti_api": "c02f7783-69d5-4951-85ef-a8e80d32de6c",
+    "low_side_manifest_dir": "/Backup/Dashy/STAGING_files/RAW LOGS/3.Logs",
+    "high_side_manifest_dir": "/Backup/Dashy/STAGING_files/RAW LOGS/9.LogsH",
+    "resend_manifest_dir": "/Backup/Dashy/STAGING_files/RAW LOGS/3.Logs",
+    "feed_backup_dir": "/Backup/Dashy/STAGING_files/Backup_file",
+    "resend_folder": "/Backup/Dashy/STAGING_files/resend_file",
+    "manifest_enabled": true,
+    "resend_enabled": true
+}

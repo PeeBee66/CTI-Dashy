@@ -62,20 +62,20 @@ def compare_manifests(source_file, target_file):
         logger.error(f"Error comparing manifests: {str(e)}")
         raise
 
-def compare_all_manifests(system1_dir, system2_dir):
+def compare_all_manifests(low_side_dir, high_side_dir):
     try:
-        system1_files = get_manifest_files(system1_dir)
+        low_side_files = get_manifest_files(low_side_dir)
         results = []
         
-        for file in system1_files:
-            source_file = os.path.join(system1_dir, file['name'])
-            target_file = os.path.join(system2_dir, file['name'])
+        for file in low_side_files:
+            source_file = os.path.join(low_side_dir, file['name'])
+            target_file = os.path.join(high_side_dir, file['name'])
             
             if not os.path.exists(target_file):
                 results.append({
                     'manifest': file['name'],
                     'differences': [],
-                    'error': 'Target file not found on system2'
+                    'error': 'Target file not found on high side'
                 })
                 continue
                 
@@ -106,13 +106,13 @@ def manifest():
                              feature_name='Manifest',
                              active_tab='manifest')
     
-    system1_dir = config.get('system1_manifest_dir', '')
-    system2_dir = config.get('system2_manifest_dir', '')
+    low_side_dir = config.get('low_side_manifest_dir', '')
+    high_side_dir = config.get('high_side_manifest_dir', '')
     
     return render_template('manifest.html',
                          active_tab='manifest',
-                         system1_files=get_manifest_files(system1_dir),
-                         system2_files=get_manifest_files(system2_dir))
+                         low_side_files=get_manifest_files(low_side_dir),
+                         high_side_files=get_manifest_files(high_side_dir))
 
 @app.route('/refresh_manifest_files', methods=['POST'])
 def refresh_manifest_files():
@@ -124,13 +124,13 @@ def refresh_manifest_files():
                 'message': 'Manifest feature is disabled'
             }), 403
             
-        system1_dir = config.get('system1_manifest_dir', '')
-        system2_dir = config.get('system2_manifest_dir', '')
+        low_side_dir = config.get('low_side_manifest_dir', '')
+        high_side_dir = config.get('high_side_manifest_dir', '')
         
         return jsonify({
             'status': 'success',
-            'system1_files': get_manifest_files(system1_dir),
-            'system2_files': get_manifest_files(system2_dir)
+            'low_side_files': get_manifest_files(low_side_dir),
+            'high_side_files': get_manifest_files(high_side_dir)
         })
         
     except Exception as e:
@@ -154,8 +154,8 @@ def compare_manifests_endpoint():
         if not data or 'source_file' not in data or 'target_file' not in data:
             return jsonify({'status': 'error', 'message': 'Missing file selection'}), 400
             
-        source_file = os.path.join(config['system1_manifest_dir'], data['source_file'])
-        target_file = os.path.join(config['system2_manifest_dir'], data['target_file'])
+        source_file = os.path.join(config['low_side_manifest_dir'], data['source_file'])
+        target_file = os.path.join(config['high_side_manifest_dir'], data['target_file'])
         
         differences = compare_manifests(source_file, target_file)
         return jsonify({'status': 'success', 'differences': differences})
@@ -174,10 +174,10 @@ def compare_all_manifests_endpoint():
                 'message': 'Manifest feature is disabled'
             }), 403
             
-        system1_dir = config.get('system1_manifest_dir', '')
-        system2_dir = config.get('system2_manifest_dir', '')
+        low_side_dir = config.get('low_side_manifest_dir', '')
+        high_side_dir = config.get('high_side_manifest_dir', '')
         
-        results = compare_all_manifests(system1_dir, system2_dir)
+        results = compare_all_manifests(low_side_dir, high_side_dir)
         return jsonify({'status': 'success', 'results': results})
         
     except Exception as e:

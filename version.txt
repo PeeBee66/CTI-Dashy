@@ -1,6 +1,10 @@
-2.0.3 - Current
+2.0.4 - Current
+- Added TOR CSV for CSVMappering
+
+2.0.3 - Fixes
 - Fix doogle seach throwing up errors
 - Fix the Resend error message and add in a verification
+- FIxt astetix and
 
 2.0.2 - Quality of life additions
 - Added version display

@@ -9,13 +9,13 @@
     <div class="manifest-grid">
         <div class="manifest-files">
             <div class="manifest-header">
-                <h3>system1 Files (Source of Truth)</h3>
+                <h3>Low Side Files (Source of Truth)</h3>
                 <button id="refresh-btn" class="refresh-button" title="Refresh list">
                     <span class="refresh-icon">↻</span> Refresh
                 </button>
             </div>
-            <div id="system1-files" class="file-list">
-                {% for file in system1_files %}
+            <div id="low-side-files" class="file-list">
+                {% for file in low_side_files %}
                 <div class="file-item">
                     <div class="file-info">
                         <div class="file-name">{{ file.name }}</div>
@@ -27,9 +27,9 @@
         </div>
         
         <div class="manifest-files">
-            <h3>system2 Files</h3>
-            <div id="system2-files" class="file-list">
-                {% for file in system2_files %}
+            <h3>High Side Files</h3>
+            <div id="high-side-files" class="file-list">
+                {% for file in high_side_files %}
                 <div class="file-item">
                     <div class="file-info">
                         <div class="file-name">{{ file.name }}</div>

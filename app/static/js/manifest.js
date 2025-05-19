@@ -33,7 +33,7 @@ function initializeCompareAllButton() {
 }
 
 function findMatchingFile(filename, sourceToTarget) {
-    const selector = sourceToTarget ? '#system2-files' : '#system1-files';
+    const selector = sourceToTarget ? '#high-side-files' : '#low-side-files';
     const container = document.querySelector(selector);
     if (!container) return null;
 
@@ -100,8 +100,8 @@ function refreshFileList() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            updateFileList('system1-files', data.system1_files);
-            updateFileList('system2-files', data.system2_files);
+            updateFileList('low-side-files', data.low_side_files);
+            updateFileList('high-side-files', data.high_side_files);
             clearAllSelections();
         } else {
             showError(data.message || 'Failed to refresh file list');
@@ -287,7 +287,7 @@ function displayResults(differences, manifestName = null) {
     summaryDiv.className = 'comparison-summary';
     summaryDiv.innerHTML = `
         <h3>${manifestName ? `Comparison Results for ${manifestName}` : 'Comparison Results'}</h3>
-        <p>Found ${differences.length} entries in system1 missing from system2</p>
+        <p>Found ${differences.length} entries in Low Side missing from High Side</p>
     `;
     resultsContainer.appendChild(summaryDiv);
     

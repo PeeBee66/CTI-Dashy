@@ -1,0 +1,69 @@
+{# app/templates/tor.html #}
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tor.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="tor-container">
+    <div class="tor-header">
+        <h2>Tor Nodes Monitor</h2>
+        <div class="button-group">
+            <button id="show-csv-btn" class="secondary-button" onclick="window.open('/tor/nodes.csv', '_blank')">
+                Show Raw CSV
+            </button>
+            <button id="refresh-btn" class="refresh-button">
+                <span class="refresh-icon">↻</span> Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="tor-grid" id="tor-nodes">
+        {% for node in nodes %}
+        <div class="node-card">
+            <div class="node-header">
+                <span class="node-name">{{ node.name }}</span>
+                {% if node.is_exit %}
+                <span class="exit-badge">Exit Node</span>
+                {% endif %}
+            </div>
+            <div class="node-content">
+                <div class="info-row">
+                    <span class="label">IP:</span>
+                    <span class="value">{{ node.ip }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Ports:</span>
+                    <span class="value">{{ node.onion_port }} (Onion) / {{ node.dir_port }} (Dir)</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Version:</span>
+                    <span class="value">{{ node.version }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Uptime:</span>
+                    <span class="value">{{ node.uptime }} seconds</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Flags:</span>
+                    <span class="value">{{ node.flags|join(', ') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Contact:</span>
+                    <span class="value">{{ node.contact }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Collection Date:</span>
+                    <span class="value">{{ node.collection_date }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/tor.js') }}"></script>
+{% endblock %}

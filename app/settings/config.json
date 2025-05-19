@@ -1,11 +1,14 @@
 {
-    "opencti_url": "http://192.168.0.45:6000/",
-    "opencti_api": "your-api-key-here",
-    "low_side_manifest_dir": "/opt/cti/data/3.Logs",
-    "high_side_manifest_dir": "/opt/cti/data/9.LogsH",
-    "resend_manifest_dir": "/opt/cti/data/3.Logs",
-    "feed_backup_dir": "/opt/cti/data/Feed_location",
-    "resend_folder": "/opt/cti/data/Resend",
-    "manifest_enabled": true,
+    "opencti_url": "http://172.21.32.84:4000/",
+    "opencti_api": "c02f7783-69d5-4951-85ef-a8e80d32de6c",
+    "system1_manifest_dir": "",
+    "system2_manifest_dir": "",
+    "resend_manifest_dir": "/mnt/ctibackupdata/3.Logs",
+    "feed_backup_dir": "/mnt/ctibackupdata/1.Feeds",
+    "resend_folder": "/mnt/connector/prod/4_re_queue",
+    "manifest_enabled": false,
     "resend_enabled": true
+    "tor_enabled": true,
+    "tor_csv_dir": "/home/opencti_admin/TOR_NODES",
+    "tor_refresh_interval": 12
 }

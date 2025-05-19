@@ -1,4 +1,4 @@
-{# CTIDashy_Flask/app/templates/settings.html #}
+{# app/templates/settings.html #}
 {% extends "base.html" %}
 {% block content %}
 <div class="settings-container">
@@ -41,12 +41,12 @@
                     </div>
                     <div class="settings-fields" {% if not config.manifest_enabled %}style="display: none;"{% endif %}>
                         <div class="form-group">
-                            <label>system1 manifest folder location:</label>
-                            <input type="text" name="system1_manifest_dir" value="{{ config.system1_manifest_dir }}">
+                            <label>Low-side manifest folder location:</label>
+                            <input type="text" name="low_side_manifest_dir" value="{{ config.low_side_manifest_dir }}">
                         </div>
                         <div class="form-group">
-                            <label>system2 manifest folder location:</label>
-                            <input type="text" name="system2_manifest_dir" value="{{ config.system2_manifest_dir }}">
+                            <label>High-side manifest folder location:</label>
+                            <input type="text" name="high_side_manifest_dir" value="{{ config.high_side_manifest_dir }}">
                         </div>
                     </div>
                 </div>
@@ -67,7 +67,7 @@
                     </div>
                     <div class="settings-fields" {% if not config.resend_enabled %}style="display: none;"{% endif %}>
                         <div class="form-group">
-                            <label>system1 manifest folder location:</label>
+                            <label>Low-side manifest folder location:</label>
                             <input type="text" name="resend_manifest_dir" value="{{ config.resend_manifest_dir }}">
                         </div>
                         <div class="form-group">
@@ -77,6 +77,32 @@
                         <div class="form-group">
                             <label>Resend drop folder:</label>
                             <input type="text" name="resend_folder" value="{{ config.resend_folder }}">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tor">
+                <div class="section-header">
+                    <h3>Tor Node Configuration</h3>
+                    <label class="toggle">
+                        <input type="checkbox" name="tor_enabled" {% if config.tor_enabled %}checked{% endif %} onchange="toggleSection('tor')">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">{% if config.tor_enabled %}Enabled{% else %}Disabled{% endif %}</span>
+                    </label>
+                </div>
+                <div class="section-content {% if not config.tor_enabled %}disabled{% endif %}">
+                    <div class="disabled-message" {% if config.tor_enabled %}style="display: none;"{% endif %}>
+                        This feature is currently disabled. Enable it using the toggle above.
+                    </div>
+                    <div class="settings-fields" {% if not config.tor_enabled %}style="display: none;"{% endif %}>
+                        <div class="form-group">
+                            <label>Tor CSV Directory:</label>
+                            <input type="text" name="tor_csv_dir" value="{{ config.tor_csv_dir }}" placeholder="/path/to/tor/csv/files">
+                        </div>
+                        <div class="form-group">
+                            <label>Auto-refresh Interval (minutes):</label>
+                            <input type="number" name="tor_refresh_interval" value="{{ config.tor_refresh_interval|default(5) }}" min="1" max="60">
                         </div>
                     </div>
                 </div>
@@ -180,10 +206,6 @@ function toggleSection(sectionId) {
     settingsFields.style.display = checkbox.checked ? 'block' : 'none';
 }
 
-document.querySelectorAll('.toggle input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', () => updateToggleLabel(checkbox));
-});
-
 function testOpenCTI() {
     const url = document.querySelector('input[name="opencti_url"]').value;
     const api = document.querySelector('input[name="opencti_api"]').value;
@@ -220,6 +242,9 @@ document.getElementById('settings-form').addEventListener('submit', function(e) 
     }
     if (!formData.has('resend_enabled')) {
         formData.append('resend_enabled', 'off');
+    }
+    if (!formData.has('tor_enabled')) {
+        formData.append('tor_enabled', 'off');
     }
     
     fetch('/update_settings', {

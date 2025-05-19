@@ -18,13 +18,16 @@ def update_settings():
         config_data = {
             'opencti_url': request.form.get('opencti_url', ''),
             'opencti_api': request.form.get('opencti_api', ''),
-            'system1_manifest_dir': request.form.get('system1_manifest_dir', ''),
-            'system2_manifest_dir': request.form.get('system2_manifest_dir', ''),
+            'low_side_manifest_dir': request.form.get('low_side_manifest_dir', ''),
+            'high_side_manifest_dir': request.form.get('high_side_manifest_dir', ''),
             'resend_manifest_dir': request.form.get('resend_manifest_dir', ''),
             'feed_backup_dir': request.form.get('feed_backup_dir', ''),
             'resend_folder': request.form.get('resend_folder', ''),
             'manifest_enabled': request.form.get('manifest_enabled') == 'on',
-            'resend_enabled': request.form.get('resend_enabled') == 'on'
+            'resend_enabled': request.form.get('resend_enabled') == 'on',
+            'tor_enabled': request.form.get('tor_enabled') == 'on',  # Add this line
+            'tor_csv_dir': request.form.get('tor_csv_dir', ''),  # Add this line
+            'tor_refresh_interval': int(request.form.get('tor_refresh_interval', 5))  # Add this line
         }
         save_config(config_data)
         return jsonify({'status': 'success', 'message': 'Settings saved successfully'})

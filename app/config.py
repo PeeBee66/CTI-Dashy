@@ -23,18 +23,24 @@ def normalize_path(path):
     # Convert to OS-specific format
     return os.path.normpath(normalized)
 
+# app/config.py
 def load_config():
     default_config = {
         'opencti_url': '',
         'opencti_api': '',
         'resend_manifest_dir': '',
-        'system1_manifest_dir': '',
-        'system2_manifest_dir': '',
+        'low_side_manifest_dir': '',
+        'high_side_manifest_dir': '',
         'feed_backup_dir': '',
         'resend_folder': '',
         'manifest_enabled': True,
-        'resend_enabled': True
+        'resend_enabled': True,
+        'tor_enabled': True,  # Add this line
+        'tor_csv_dir': '',    # Add this line
+        'tor_refresh_interval': 5  # Add this line
     }
+    
+    # Rest of the function remains the same
     
     os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
     
@@ -45,8 +51,8 @@ def load_config():
             # Normalize path fields
             path_fields = [
                 'resend_manifest_dir',
-                'system1_manifest_dir',
-                'system2_manifest_dir',
+                'low_side_manifest_dir',
+                'high_side_manifest_dir',
                 'feed_backup_dir',
                 'resend_folder'
             ]
@@ -65,8 +71,8 @@ def save_config(config_data):
     # Save paths in a platform-independent format (forward slashes)
     path_fields = [
         'resend_manifest_dir',
-        'system1_manifest_dir',
-        'system2_manifest_dir',
+        'low_side_manifest_dir',
+        'high_side_manifest_dir',
         'feed_backup_dir',
         'resend_folder'
     ]
