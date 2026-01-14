@@ -1,4 +1,3 @@
-# CTIDashy Flask
 ![image](https://github.com/user-attachments/assets/f115bdfd-c6ab-434a-9985-339043cdeb54)
 
 ## 🚀 Overview
