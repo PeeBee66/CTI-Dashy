@@ -1,10 +1,14 @@
-2.0.4 - Current
-- Added TOR CSV for CSVMappering
+2.1.0 - Current
+- Added bulk resend by criteria (filter by manifest, date range, and feed)
+- Added checkbox selection on search results with bulk resend capability
+- Added preview functionality for bulk operations
+- Enhanced resend page with multi-file processing
+- Added detailed success/failure reporting for bulk operations
 
-2.0.3 - Fixes
-- Fix doogle seach throwing up errors
+2.0.31 - Previous
+- Fix doogle search throwing up errors
 - Fix the Resend error message and add in a verification
-- FIxt astetix and
+- Fix asterisk and
 
 2.0.2 - Quality of life additions
 - Added version display

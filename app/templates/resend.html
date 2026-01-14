@@ -27,9 +27,50 @@
     </div>
 
     <div class="search-section">
+        <div class="bulk-resend-section">
+            <div class="bulk-header">
+                <h3>Bulk Resend by Criteria</h3>
+            </div>
+            <div id="bulk-controls" class="bulk-controls">
+                <div class="bulk-control-row">
+                    <div class="control-group">
+                        <label for="manifest-selector">Manifests (leave empty for all):</label>
+                        <select id="manifest-selector" multiple size="4">
+                            {% for manifest in manifests %}
+                            <option value="{{ manifest.name }}">{{ manifest.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="date-from">Date From:</label>
+                        <input type="date" id="date-from" class="date-input">
+                    </div>
+                    <div class="control-group">
+                        <label for="date-to">Date To:</label>
+                        <input type="date" id="date-to" class="date-input">
+                    </div>
+                    <div class="control-group">
+                        <label for="feed-filter">Feed Filter (optional):</label>
+                        <input type="text" id="feed-filter" placeholder="e.g., CrowdStrike">
+                    </div>
+                </div>
+                <div class="bulk-action-row">
+                    <button id="preview-bulk-btn" class="bulk-action-btn">Preview Files</button>
+                    <button id="resend-all-btn" class="bulk-action-btn" disabled>Resend All (<span id="bulk-count">0</span>)</button>
+                </div>
+                <div id="bulk-preview" class="bulk-preview"></div>
+            </div>
+        </div>
+
         <div class="search-controls">
             <input type="text" id="search-input" placeholder="Search by Filename, CTIfeed, MD5Hash, DateTime, FileSize, or FlowUUID...">
             <button onclick="performSearch()" class="search-button">Search</button>
+        </div>
+        <div id="selection-controls" class="selection-controls" style="display: none;">
+            <button id="select-all-btn" class="selection-btn">Select All</button>
+            <button id="deselect-all-btn" class="selection-btn">Deselect All</button>
+            <span id="selection-count">0 selected</span>
+            <button id="resend-selected-btn" class="resend-selected-btn" disabled>Resend Selected (0)</button>
         </div>
         <div id="search-results" class="results-container"></div>
     </div>

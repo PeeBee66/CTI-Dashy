@@ -60,6 +60,84 @@ def extract_year_from_datetime(dt_str):
         logger.error(f"Error extracting year from {dt_str}: {str(e)}")
         return None
 
+def parse_date_from_datetime(dt_str):
+    """Parse date object from datetime string for filtering"""
+    try:
+        dt = datetime.strptime(dt_str.strip(), "%a %b %d %H:%M:%S UTC %Y")
+        return dt.date()
+    except Exception as e:
+        logger.error(f"Error parsing date from {dt_str}: {str(e)}")
+        return None
+
+def process_single_resend(file_data, config):
+    """Process a single file resend operation"""
+    try:
+        if not all(key in file_data for key in ['Filename', 'CTIfeed', 'DateTime']):
+            return {
+                'file': file_data.get('Filename', 'Unknown'),
+                'status': 'error',
+                'message': 'Missing required file information'
+            }
+
+        source_base = config.get('feed_backup_dir', '').strip()
+        target_base = config.get('resend_folder', '').strip()
+
+        if not source_base or not target_base:
+            return {
+                'file': file_data['Filename'],
+                'status': 'error',
+                'message': 'Feed backup or resend folders not configured'
+            }
+
+        year = extract_year_from_datetime(file_data['DateTime'])
+        if not year:
+            return {
+                'file': file_data['Filename'],
+                'status': 'error',
+                'message': 'Could not determine year from DateTime'
+            }
+
+        feed_folder = file_data['CTIfeed']
+        filename = file_data['Filename']
+
+        source_path = os.path.join(source_base, feed_folder, year, filename)
+        target_folder = os.path.join(target_base, feed_folder)
+        target_path = os.path.join(target_folder, filename)
+
+        if not os.path.exists(source_path):
+            return {
+                'file': filename,
+                'status': 'error',
+                'message': f'Source file not found: {source_path}'
+            }
+
+        os.makedirs(target_folder, mode=0o777, exist_ok=True)
+
+        success, message = verify_file_transfer(source_path, target_path)
+
+        if not success:
+            return {
+                'file': filename,
+                'status': 'error',
+                'message': f'Transfer verification failed: {message}'
+            }
+
+        return {
+            'file': filename,
+            'status': 'success',
+            'message': 'File transferred successfully',
+            'source_path': source_path,
+            'target_path': target_path
+        }
+
+    except Exception as e:
+        logger.error(f"Error processing {file_data.get('Filename', 'Unknown')}: {str(e)}")
+        return {
+            'file': file_data.get('Filename', 'Unknown'),
+            'status': 'error',
+            'message': str(e)
+        }
+
 def verify_file_transfer(source_path, target_path):
     """Verify file transfer by comparing file sizes, existence and permissions"""
     try:
@@ -248,4 +326,132 @@ def initiate_resend():
         
     except Exception as e:
         logger.error(f"Resend error: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/filter_files', methods=['POST'])
+def filter_files():
+    """Filter manifest files by criteria (manifest names, date range, feed)"""
+    try:
+        config = load_config()
+        if not config.get('resend_enabled', True):
+            return jsonify({
+                'status': 'error',
+                'message': 'Resend feature is disabled'
+            }), 403
+
+        data = request.get_json()
+        manifest_dir = config.get('resend_manifest_dir', '')
+
+        manifest_names = data.get('manifest_files', [])
+        date_from_str = data.get('date_from', '').strip()
+        date_to_str = data.get('date_to', '').strip()
+        feed_filter = data.get('feed_filter', '').strip()
+
+        # Parse date filters
+        date_from = None
+        date_to = None
+        if date_from_str:
+            try:
+                date_from = datetime.strptime(date_from_str, "%Y-%m-%d").date()
+            except Exception as e:
+                logger.error(f"Invalid date_from format: {date_from_str}")
+
+        if date_to_str:
+            try:
+                date_to = datetime.strptime(date_to_str, "%Y-%m-%d").date()
+            except Exception as e:
+                logger.error(f"Invalid date_to format: {date_to_str}")
+
+        # If no manifests specified, use all
+        if not manifest_names:
+            all_manifests = get_manifest_contents(manifest_dir)
+            manifest_names = [m['name'] for m in all_manifests]
+
+        # Read and filter files
+        filtered_files = []
+        for manifest_name in manifest_names:
+            file_path = os.path.join(manifest_dir, manifest_name)
+            if not os.path.exists(file_path):
+                continue
+
+            manifest_results = read_manifest_file(file_path)
+            for row in manifest_results:
+                # Apply feed filter
+                if feed_filter and feed_filter.lower() not in row.get('CTIfeed', '').lower():
+                    continue
+
+                # Apply date filter
+                if date_from or date_to:
+                    file_date = parse_date_from_datetime(row.get('DateTime', ''))
+                    if not file_date:
+                        continue
+                    if date_from and file_date < date_from:
+                        continue
+                    if date_to and file_date > date_to:
+                        continue
+
+                row['ManifestFile'] = manifest_name
+                filtered_files.append(row)
+
+        logger.info(f"Filtered {len(filtered_files)} files from {len(manifest_names)} manifests")
+        return jsonify({
+            'status': 'success',
+            'files': filtered_files,
+            'count': len(filtered_files)
+        })
+
+    except Exception as e:
+        logger.error(f"Filter error: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/bulk_resend', methods=['POST'])
+def bulk_resend():
+    """Process multiple file resends in bulk"""
+    try:
+        config = load_config()
+        if not config.get('resend_enabled', True):
+            return jsonify({
+                'status': 'error',
+                'message': 'Resend feature is disabled'
+            }), 403
+
+        data = request.get_json()
+        files = data.get('files', [])
+
+        if not files:
+            return jsonify({
+                'status': 'error',
+                'message': 'No files provided for bulk resend'
+            }), 400
+
+        logger.info(f"Processing bulk resend for {len(files)} files")
+
+        success_results = []
+        failed_results = []
+
+        for file_data in files:
+            result = process_single_resend(file_data, config)
+
+            if result['status'] == 'success':
+                success_results.append(result)
+            else:
+                failed_results.append(result)
+
+        logger.info(f"Bulk resend complete: {len(success_results)} succeeded, {len(failed_results)} failed")
+
+        return jsonify({
+            'status': 'success',
+            'summary': {
+                'total': len(files),
+                'succeeded': len(success_results),
+                'failed': len(failed_results)
+            },
+            'results': {
+                'success': success_results,
+                'failed': failed_results
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Bulk resend error: {str(e)}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
