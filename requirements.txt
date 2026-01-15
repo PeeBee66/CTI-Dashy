@@ -6,6 +6,7 @@ python-dotenv==1.0.0
 requests==2.31.0
 pandas==2.1.4
 waitress==2.1.2
-Werkzeug==2.2.3
+Werkzeug==3.1
 gunicorn==20.1.0
 pycti==5.8.0
+
