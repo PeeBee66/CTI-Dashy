@@ -67,16 +67,12 @@
                     </div>
                     <div class="settings-fields" {% if not config.resend_enabled %}style="display: none;"{% endif %}>
                         <div class="form-group">
-                            <label>Low-side manifest folder location:</label>
+                            <label>Manifest folder location:</label>
                             <input type="text" name="resend_manifest_dir" value="{{ config.resend_manifest_dir }}">
                         </div>
                         <div class="form-group">
-                            <label>Back-up Feeds folder location:</label>
-                            <input type="text" name="feed_backup_dir" value="{{ config.feed_backup_dir }}">
-                        </div>
-                        <div class="form-group">
-                            <label>Resend drop folder:</label>
-                            <input type="text" name="resend_folder" value="{{ config.resend_folder }}">
+                            <label>Resend output folder:</label>
+                            <input type="text" name="resend_folder" value="{{ config.resend_folder }}" placeholder="Default: app/resend_queue">
                         </div>
                     </div>
                 </div>

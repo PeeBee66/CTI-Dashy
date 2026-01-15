@@ -1,9 +1,20 @@
-2.2.0 - Current
+2.3.0 - Current
+- Restructured resend feature to create .txt request files instead of copying files
+- Resend now creates {MD5Hash}.txt files with file metadata
+- Removed feed_backup_dir setting (no longer needed)
+- Default resend folder is now app/resend_queue/
+- Simplified resend configuration in settings
+- Added detailed file list table in bulk preview (Filename, Feed, DateTime, MD5)
+- Added file list in bulk resend summary popup
+- Fixed resend page layout (removed overlapping fixed positioning)
+- Improved date parsing to support multiple formats
+
+2.2.0 - Previous
 - Removed TOR functionality
 - Updated all dependencies to latest versions
 - Cleaned up codebase
 
-2.1.0 - Previous
+2.1.0
 - Added bulk resend by criteria (filter by manifest, date range, and feed)
 - Added checkbox selection on search results with bulk resend capability
 - Added preview functionality for bulk operations

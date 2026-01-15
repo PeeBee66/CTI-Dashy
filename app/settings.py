@@ -21,7 +21,6 @@ def update_settings():
             'low_side_manifest_dir': request.form.get('low_side_manifest_dir', ''),
             'high_side_manifest_dir': request.form.get('high_side_manifest_dir', ''),
             'resend_manifest_dir': request.form.get('resend_manifest_dir', ''),
-            'feed_backup_dir': request.form.get('feed_backup_dir', ''),
             'resend_folder': request.form.get('resend_folder', ''),
             'manifest_enabled': request.form.get('manifest_enabled') == 'on',
             'resend_enabled': request.form.get('resend_enabled') == 'on'

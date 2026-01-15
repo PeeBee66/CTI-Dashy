@@ -1,7 +1,6 @@
 import os
 import logging
 import csv
-import shutil
 from datetime import datetime
 from flask import render_template, jsonify, request
 from app import app
@@ -52,82 +51,71 @@ def read_manifest_file(file_path):
         logger.error(f"Error reading manifest {file_path}: {str(e)}")
         return []
 
-def extract_year_from_datetime(dt_str):
-    try:
-        dt = datetime.strptime(dt_str.strip(), "%a %b %d %H:%M:%S UTC %Y")
-        return str(dt.year)
-    except Exception as e:
-        logger.error(f"Error extracting year from {dt_str}: {str(e)}")
+def parse_date_from_datetime(dt_str):
+    """Parse date object from datetime string for filtering - tries multiple formats"""
+    if not dt_str:
         return None
 
-def parse_date_from_datetime(dt_str):
-    """Parse date object from datetime string for filtering"""
-    try:
-        dt = datetime.strptime(dt_str.strip(), "%a %b %d %H:%M:%S UTC %Y")
-        return dt.date()
-    except Exception as e:
-        logger.error(f"Error parsing date from {dt_str}: {str(e)}")
-        return None
+    dt_str = dt_str.strip()
+
+    # Try multiple date formats
+    formats = [
+        "%a %b %d %H:%M:%S UTC %Y",  # Wed Jan 29 14:23:45 UTC 2025
+        "%Y-%m-%d %H:%M:%S",          # 2025-01-29 14:23:45
+        "%Y-%m-%dT%H:%M:%S",          # 2025-01-29T14:23:45
+        "%d/%m/%Y %H:%M:%S",          # 29/01/2025 14:23:45
+        "%m/%d/%Y %H:%M:%S",          # 01/29/2025 14:23:45
+    ]
+
+    for fmt in formats:
+        try:
+            dt = datetime.strptime(dt_str, fmt)
+            return dt.date()
+        except ValueError:
+            continue
+
+    # If no format matched, log at debug level and return None
+    logger.debug(f"Could not parse date from: {dt_str}")
+    return None
 
 def process_single_resend(file_data, config):
-    """Process a single file resend operation"""
+    """Process a single file resend operation - creates a .txt file with file metadata"""
     try:
-        if not all(key in file_data for key in ['Filename', 'CTIfeed', 'DateTime']):
+        md5_hash = file_data.get('MD5Hash', '').strip()
+        filename = file_data.get('Filename', '').strip()
+        feed = file_data.get('CTIfeed', '').strip()
+
+        logger.info(f"Processing: {filename}, MD5: {md5_hash[:20] if md5_hash else 'EMPTY'}...")
+
+        if not md5_hash or not filename:
             return {
-                'file': file_data.get('Filename', 'Unknown'),
+                'file': filename or 'Unknown',
                 'status': 'error',
-                'message': 'Missing required file information'
+                'message': 'Missing MD5Hash or Filename'
             }
 
-        source_base = config.get('feed_backup_dir', '').strip()
-        target_base = config.get('resend_folder', '').strip()
+        resend_folder = config.get('resend_folder', '').strip()
+        if not resend_folder:
+            # Default to app/resend_queue
+            resend_folder = os.path.join(os.path.dirname(__file__), 'resend_queue')
 
-        if not source_base or not target_base:
-            return {
-                'file': file_data['Filename'],
-                'status': 'error',
-                'message': 'Feed backup or resend folders not configured'
-            }
+        os.makedirs(resend_folder, exist_ok=True)
 
-        year = extract_year_from_datetime(file_data['DateTime'])
-        if not year:
-            return {
-                'file': file_data['Filename'],
-                'status': 'error',
-                'message': 'Could not determine year from DateTime'
-            }
+        txt_filename = f"{md5_hash}.txt"
+        txt_path = os.path.join(resend_folder, txt_filename)
 
-        feed_folder = file_data['CTIfeed']
-        filename = file_data['Filename']
+        content = f"file name: {filename}\nCTIfeed: {feed}\nMD5Hash: {md5_hash}\n"
 
-        source_path = os.path.join(source_base, feed_folder, year, filename)
-        target_folder = os.path.join(target_base, feed_folder)
-        target_path = os.path.join(target_folder, filename)
+        with open(txt_path, 'w') as f:
+            f.write(content)
 
-        if not os.path.exists(source_path):
-            return {
-                'file': filename,
-                'status': 'error',
-                'message': f'Source file not found: {source_path}'
-            }
-
-        os.makedirs(target_folder, mode=0o777, exist_ok=True)
-
-        success, message = verify_file_transfer(source_path, target_path)
-
-        if not success:
-            return {
-                'file': filename,
-                'status': 'error',
-                'message': f'Transfer verification failed: {message}'
-            }
+        logger.info(f"Created resend request: {txt_path}")
 
         return {
             'file': filename,
             'status': 'success',
-            'message': 'File transferred successfully',
-            'source_path': source_path,
-            'target_path': target_path
+            'message': 'Resend request created',
+            'txt_path': txt_path
         }
 
     except Exception as e:
@@ -137,50 +125,6 @@ def process_single_resend(file_data, config):
             'status': 'error',
             'message': str(e)
         }
-
-def verify_file_transfer(source_path, target_path):
-    """Verify file transfer by comparing file sizes, existence and permissions"""
-    try:
-        if not os.path.exists(source_path):
-            return False, "Source file not found"
-            
-        target_dir = os.path.dirname(target_path)
-        if not os.path.exists(target_dir):
-            try:
-                os.makedirs(target_dir, mode=0o777, exist_ok=True)
-            except Exception as e:
-                return False, f"Cannot create target directory: {str(e)}"
-                
-        if not os.access(target_dir, os.W_OK):
-            return False, f"Target directory not writable: {target_dir}"
-            
-        try:
-            shutil.copy2(source_path, target_path)
-        except Exception as e:
-            return False, f"Copy failed: {str(e)}"
-            
-        if not os.path.exists(target_path):
-            return False, "Target file not created after copy attempt"
-            
-        source_size = os.path.getsize(source_path)
-        target_size = os.path.getsize(target_path)
-        
-        if source_size != target_size:
-            os.remove(target_path)
-            return False, f"Size mismatch: Source={source_size}, Target={target_size}"
-            
-        source_perms = os.stat(source_path).st_mode
-        target_perms = os.stat(target_path).st_mode
-        if source_perms != target_perms:
-            try:
-                os.chmod(target_path, source_perms)
-            except Exception as e:
-                return False, f"Could not set target permissions: {str(e)}"
-                
-        return True, "File transfer verified successfully"
-        
-    except Exception as e:
-        return False, f"Verification error: {str(e)}"
 
 @app.route('/resend')
 def resend():
@@ -262,67 +206,28 @@ def initiate_resend():
     try:
         config = load_config()
         data = request.get_json()
-        
-        if not data or not all(key in data for key in ['Filename', 'CTIfeed', 'DateTime']):
-            return jsonify({
-                'status': 'error', 
-                'message': 'Missing required file information'
-            }), 400
-            
-        source_base = config.get('feed_backup_dir', '').strip()
-        target_base = config.get('resend_folder', '').strip()
-        
-        if not source_base or not target_base:
+
+        if not data or not all(key in data for key in ['Filename', 'MD5Hash']):
             return jsonify({
                 'status': 'error',
-                'message': 'Feed backup or resend folders not configured'
+                'message': 'Missing required file information (Filename, MD5Hash)'
             }), 400
 
-        year = extract_year_from_datetime(data['DateTime'])
-        if not year:
+        result = process_single_resend(data, config)
+
+        if result['status'] == 'success':
+            return jsonify({
+                'status': 'success',
+                'message': result['message'],
+                'details': {
+                    'txt_path': result.get('txt_path', '')
+                }
+            })
+        else:
             return jsonify({
                 'status': 'error',
-                'message': 'Could not determine year from DateTime'
-            }), 400
-            
-        feed_folder = data['CTIfeed']
-        filename = data['Filename']
-        
-        source_path = os.path.join(source_base, feed_folder, year, filename)
-        target_folder = os.path.join(target_base, feed_folder)
-        target_path = os.path.join(target_folder, filename)
-        
-        if not os.path.exists(source_path):
-            return jsonify({
-                'status': 'error',
-                'message': f'Source file not found: {source_path}'
-            }), 404
-            
-        os.makedirs(target_folder, mode=0o777, exist_ok=True)
-        
-        success, message = verify_file_transfer(source_path, target_path)
-        
-        if not success:
-            return jsonify({
-                'status': 'error',
-                'message': f'Transfer verification failed: {message}'
+                'message': result['message']
             }), 500
-            
-        if not os.path.exists(target_path):
-            return jsonify({
-                'status': 'error',
-                'message': 'File appears missing after successful transfer'
-            }), 500
-            
-        return jsonify({
-            'status': 'success',
-            'message': f'File successfully copied from {source_path} to {target_path}',
-            'details': {
-                'source_path': source_path,
-                'target_path': target_path,
-                'verification': message
-            }
-        })
         
     except Exception as e:
         logger.error(f"Resend error: {str(e)}")
@@ -425,6 +330,7 @@ def bulk_resend():
             }), 400
 
         logger.info(f"Processing bulk resend for {len(files)} files")
+        logger.info(f"Files received: {[f.get('Filename', 'Unknown') for f in files]}")
 
         success_results = []
         failed_results = []

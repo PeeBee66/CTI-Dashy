@@ -249,30 +249,20 @@ function createPopup(initialMessage) {
 }
 
 function createTransferDetails(fileData, response) {
-    // Convert size from bytes to MB
-    const sizeMB = (parseInt(fileData.FileSize) / (1024 * 1024)).toFixed(2);
-
     return `
         <div class="transfer-details">
-            <h3>Transfer Successful</h3>
+            <h3>Resend Request Created</h3>
 
             <div class="detail-section">
                 <h4>File Information</h4>
                 <p><strong>Name:</strong> ${fileData.Filename}</p>
                 <p><strong>Feed:</strong> ${fileData.CTIfeed}</p>
-                <p><strong>Size:</strong> ${sizeMB} MB</p>
                 <p><strong>MD5:</strong> ${fileData.MD5Hash}</p>
             </div>
 
             <div class="detail-section">
-                <h4>Transfer Path</h4>
-                <p><strong>From:</strong> ${response.details.source_path}</p>
-                <p><strong>To:</strong> ${response.details.target_path}</p>
-            </div>
-
-            <div class="detail-section">
-                <h4>Verification</h4>
-                <p>${response.details.verification}</p>
+                <h4>Request File</h4>
+                <p><strong>Created:</strong> ${response.details.txt_path}</p>
             </div>
 
             <button class="popup-close" onclick="this.closest('.transfer-popup').remove()">×</button>
@@ -388,21 +378,41 @@ function resendSelected() {
 
 function createBulkResultsSummary(summary, results) {
     let html = `
-        <div class="transfer-details">
-            <h3>Bulk Resend Complete</h3>
+        <div class="transfer-details bulk-summary-popup">
+            <h3>Bulk Resend Requests Created</h3>
             <div class="detail-section">
                 <h4>Summary</h4>
-                <p><strong>Total Files:</strong> ${summary.total}</p>
-                <p><strong>Succeeded:</strong> <span style="color: #2e7d32;">${summary.succeeded}</span></p>
+                <p><strong>Total Requests:</strong> ${summary.total}</p>
+                <p><strong>Created:</strong> <span style="color: #2e7d32;">${summary.succeeded}</span></p>
                 <p><strong>Failed:</strong> <span style="color: #d32f2f;">${summary.failed}</span></p>
             </div>
     `;
+
+    if (results.success && results.success.length > 0) {
+        html += `
+            <div class="detail-section">
+                <h4>Created Files (${results.success.length})</h4>
+                <div class="bulk-file-list">
+                    <table class="popup-file-table">
+                        <thead><tr><th>Filename</th><th>MD5Hash</th></tr></thead>
+                        <tbody>
+        `;
+        results.success.forEach(item => {
+            html += `<tr><td>${item.file}</td><td class="md5-cell">${item.txt_path ? item.txt_path.split('/').pop().replace('.txt', '') : ''}</td></tr>`;
+        });
+        html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
 
     if (results.failed && results.failed.length > 0) {
         html += `
             <div class="detail-section">
                 <h4>Failed Files</h4>
-                <ul style="max-height: 200px; overflow-y: auto;">
+                <ul style="max-height: 150px; overflow-y: auto;">
         `;
         results.failed.forEach(item => {
             html += `<li><strong>${item.file}:</strong> ${item.message}</li>`;
@@ -486,30 +496,24 @@ function displayBulkPreview(files) {
         return;
     }
 
-    // Group files by feed for better preview
-    const feedGroups = {};
-    files.forEach(file => {
-        const feed = file.CTIfeed || 'Unknown';
-        if (!feedGroups[feed]) {
-            feedGroups[feed] = [];
-        }
-        feedGroups[feed].push(file);
-    });
-
     let html = `<div class="preview-summary">Found ${files.length} file(s) matching criteria:</div>`;
-    html += '<div class="preview-groups">';
+    html += '<div class="preview-file-list">';
+    html += '<table class="file-list-table">';
+    html += '<thead><tr><th>Filename</th><th>Feed</th><th>DateTime</th><th>MD5Hash</th></tr></thead>';
+    html += '<tbody>';
 
-    Object.keys(feedGroups).sort().forEach(feed => {
-        const count = feedGroups[feed].length;
+    files.forEach(file => {
         html += `
-            <div class="preview-group">
-                <strong>${feed}:</strong> ${count} file(s)
-            </div>
+            <tr>
+                <td>${file.Filename || ''}</td>
+                <td>${file.CTIfeed || ''}</td>
+                <td>${file.DateTime || ''}</td>
+                <td class="md5-cell">${file.MD5Hash || ''}</td>
+            </tr>
         `;
     });
 
-    html += '</div>';
-    html += `<div class="preview-note">Click "Resend All" to process these ${files.length} file(s)</div>`;
+    html += '</tbody></table></div>';
     container.innerHTML = html;
 }
 

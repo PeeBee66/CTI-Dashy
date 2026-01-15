@@ -31,29 +31,22 @@ def load_config():
         'resend_manifest_dir': '',
         'low_side_manifest_dir': '',
         'high_side_manifest_dir': '',
-        'feed_backup_dir': '',
         'resend_folder': '',
         'manifest_enabled': True,
-        'resend_enabled': True,
-        'tor_enabled': True,  # Add this line
-        'tor_csv_dir': '',    # Add this line
-        'tor_refresh_interval': 5  # Add this line
+        'resend_enabled': True
     }
-    
-    # Rest of the function remains the same
-    
+
     os.makedirs(os.path.dirname(CONFIG_FILE), exist_ok=True)
-    
+
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, 'r') as f:
             config = json.load(f)
-            
+
             # Normalize path fields
             path_fields = [
                 'resend_manifest_dir',
                 'low_side_manifest_dir',
                 'high_side_manifest_dir',
-                'feed_backup_dir',
                 'resend_folder'
             ]
             
@@ -73,7 +66,6 @@ def save_config(config_data):
         'resend_manifest_dir',
         'low_side_manifest_dir',
         'high_side_manifest_dir',
-        'feed_backup_dir',
         'resend_folder'
     ]
     

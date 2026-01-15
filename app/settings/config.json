@@ -1,11 +1,10 @@
 {
     "opencti_url": "http://172.21.32.84:4000/",
     "opencti_api": "c02f7783-69d5-4951-85ef-a8e80d32de6c",
-    "system1_manifest_dir": "",
-    "system2_manifest_dir": "",
+    "low_side_manifest_dir": "",
+    "high_side_manifest_dir": "",
     "resend_manifest_dir": "/mnt/ctibackupdata/3.Logs",
-    "feed_backup_dir": "/mnt/ctibackupdata/1.Feeds",
-    "resend_folder": "/mnt/connector/prod/4_re_queue",
+    "resend_folder": "",
     "manifest_enabled": false,
     "resend_enabled": true
 }
