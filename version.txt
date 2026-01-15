@@ -1,11 +1,16 @@
-2.1.0 - Current
+2.2.0 - Current
+- Removed TOR functionality
+- Updated all dependencies to latest versions
+- Cleaned up codebase
+
+2.1.0 - Previous
 - Added bulk resend by criteria (filter by manifest, date range, and feed)
 - Added checkbox selection on search results with bulk resend capability
 - Added preview functionality for bulk operations
 - Enhanced resend page with multi-file processing
 - Added detailed success/failure reporting for bulk operations
 
-2.0.31 - Previous
+2.0.31
 - Fix doogle search throwing up errors
 - Fix the Resend error message and add in a verification
 - Fix asterisk and

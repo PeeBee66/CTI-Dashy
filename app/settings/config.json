@@ -8,7 +8,4 @@
     "resend_folder": "/mnt/connector/prod/4_re_queue",
     "manifest_enabled": false,
     "resend_enabled": true
-    "tor_enabled": true,
-    "tor_csv_dir": "/home/opencti_admin/TOR_NODES",
-    "tor_refresh_interval": 12
 }

@@ -82,32 +82,6 @@
                 </div>
             </section>
 
-            <section id="tor">
-                <div class="section-header">
-                    <h3>Tor Node Configuration</h3>
-                    <label class="toggle">
-                        <input type="checkbox" name="tor_enabled" {% if config.tor_enabled %}checked{% endif %} onchange="toggleSection('tor')">
-                        <span class="toggle-slider"></span>
-                        <span class="toggle-label">{% if config.tor_enabled %}Enabled{% else %}Disabled{% endif %}</span>
-                    </label>
-                </div>
-                <div class="section-content {% if not config.tor_enabled %}disabled{% endif %}">
-                    <div class="disabled-message" {% if config.tor_enabled %}style="display: none;"{% endif %}>
-                        This feature is currently disabled. Enable it using the toggle above.
-                    </div>
-                    <div class="settings-fields" {% if not config.tor_enabled %}style="display: none;"{% endif %}>
-                        <div class="form-group">
-                            <label>Tor CSV Directory:</label>
-                            <input type="text" name="tor_csv_dir" value="{{ config.tor_csv_dir }}" placeholder="/path/to/tor/csv/files">
-                        </div>
-                        <div class="form-group">
-                            <label>Auto-refresh Interval (minutes):</label>
-                            <input type="number" name="tor_refresh_interval" value="{{ config.tor_refresh_interval|default(5) }}" min="1" max="60">
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             <div class="form-actions">
                 <button type="submit">Save</button>
             </div>
@@ -242,9 +216,6 @@ document.getElementById('settings-form').addEventListener('submit', function(e) 
     }
     if (!formData.has('resend_enabled')) {
         formData.append('resend_enabled', 'off');
-    }
-    if (!formData.has('tor_enabled')) {
-        formData.append('tor_enabled', 'off');
     }
     
     fetch('/update_settings', {

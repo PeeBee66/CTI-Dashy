@@ -24,10 +24,7 @@ def update_settings():
             'feed_backup_dir': request.form.get('feed_backup_dir', ''),
             'resend_folder': request.form.get('resend_folder', ''),
             'manifest_enabled': request.form.get('manifest_enabled') == 'on',
-            'resend_enabled': request.form.get('resend_enabled') == 'on',
-            'tor_enabled': request.form.get('tor_enabled') == 'on',  # Add this line
-            'tor_csv_dir': request.form.get('tor_csv_dir', ''),  # Add this line
-            'tor_refresh_interval': int(request.form.get('tor_refresh_interval', 5))  # Add this line
+            'resend_enabled': request.form.get('resend_enabled') == 'on'
         }
         save_config(config_data)
         return jsonify({'status': 'success', 'message': 'Settings saved successfully'})
